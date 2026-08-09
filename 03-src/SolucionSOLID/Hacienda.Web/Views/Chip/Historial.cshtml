@@ -1,0 +1,61 @@
+@using Hacienda.Domain.Entities
+@model List<Geolocalizacion>
+@{
+    ViewData["Title"] = "📜 Historial de Ubicaciones";
+    var chip = ViewBag.Chip as IChip;
+    var historial = ViewBag.Historial as List<Geolocalizacion>;
+}
+
+<div class="container mt-4">
+    <div class="aw-page-header mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+                Historial del Chip @chip?.NumeroSerie
+            </h1>
+            <p class="text-muted mb-0">Registro de ubicaciones GPS</p>
+        </div>
+        <a asp-action="Index" class="btn aw-btn aw-btn-secondary">
+            <span class="material-icons-outlined" style="font-size: 1.2rem; vertical-align: sub;">arrow_back</span>
+            Volver
+        </a>
+    </div>
+
+    <div class="aw-card aw-reveal">
+        <div class="aw-card-header">Ubicaciones Registradas</div>
+        <div class="p-3">
+            @if (historial != null && historial.Any())
+            {
+                <table class="table table-hover aw-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Fecha/Hora</th>
+                            <th>Latitud</th>
+                            <th>Longitud</th>
+                            <th>Precisión</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ubi in historial.OrderByDescending(u => u.FechaHora))
+                        {
+                            <tr>
+                                <td>@ubi.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="fw-semibold">@ubi.Latitud.ToString("F6")</td>
+                                <td class="fw-semibold">@ubi.Longitud.ToString("F6")</td>
+                                <td>
+                                    @(ubi.PrecisionMetros.HasValue ? $"{ubi.PrecisionMetros:F1} m" : "N/A")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-info text-center py-4 mb-0">
+                    <h5>No hay ubicaciones registradas</h5>
+                    <p class="mb-0">Este chip aún no tiene ubicaciones GPS registradas.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,75 @@
+flowchart BT
+AccountController(AccountController)
+ErrorViewModel(ErrorViewModel)
+HomeController(HomeController)
+LoginViewModel(LoginViewModel)
+PersistenciaService(PersistenciaService)
+PotreroController(PotreroController)
+PotreroService(PotreroService)
+Program(Program)
+ResController(ResController)
+ResService(ResService)
+UsuarioController(UsuarioController)
+UsuarioService(UsuarioService)
+VacunaController(VacunaController)
+VacunaService(VacunaService)
+VentaController(VentaController)
+VentaService(VentaService)
+
+AccountController  -->  HomeController 
+LoginViewModel  ---  AccountController 
+UsuarioService  ---  AccountController 
+UsuarioService  ---  AccountController 
+UsuarioService  ---  AccountController 
+ErrorViewModel  ---  HomeController 
+HomeController  --*  HomeController 
+HomeController  -->  HomeController 
+PersistenciaService  ---  PotreroController 
+PersistenciaService  ---  PotreroController 
+PersistenciaService  ---  PotreroController 
+PotreroService  ---  PotreroController 
+PotreroService  ---  PotreroController 
+PotreroService  ---  PotreroController 
+PotreroService  --*  PersistenciaService 
+PotreroService  -->  PersistenciaService 
+PotreroService  -..->  PersistenciaService 
+PersistenciaService  ---  Program 
+PotreroService  ---  Program 
+ResService  ---  Program 
+UsuarioService  ---  Program 
+VacunaService  ---  Program 
+VentaService  ---  Program 
+PersistenciaService  ---  ResController 
+PersistenciaService  ---  ResController 
+PersistenciaService  ---  ResController 
+PotreroService  ---  ResController 
+PotreroService  ---  ResController 
+PotreroService  ---  ResController 
+ResService  ---  ResController 
+ResService  ---  ResController 
+ResService  ---  ResController 
+ResService  -..->  PersistenciaService 
+ResService  --*  PersistenciaService 
+UsuarioService  ---  UsuarioController 
+UsuarioService  ---  UsuarioController 
+UsuarioService  ---  UsuarioController 
+UsuarioService  --*  PersistenciaService 
+UsuarioService  -..->  PersistenciaService 
+UsuarioService  -->  PersistenciaService 
+PotreroService  ---  VacunaController 
+PotreroService  ---  VacunaController 
+PotreroService  ---  VacunaController 
+ResService  ---  VacunaController 
+ResService  ---  VacunaController 
+ResService  ---  VacunaController 
+VacunaService  ---  VacunaController 
+VacunaService  ---  VacunaController 
+VacunaService  ---  VacunaController 
+VacunaService  --*  PersistenciaService 
+VacunaService  -..->  PersistenciaService 
+VacunaService  -->  PersistenciaService 
+VentaService  ---  VentaController 
+VentaService  ---  VentaController 
+VentaService  ---  VentaController 
+VentaService  --*  PersistenciaService 
+VentaService  -..->  PersistenciaService 

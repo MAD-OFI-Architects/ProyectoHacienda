@@ -1,0 +1,176 @@
+flowchart BT
+Autenticacion(Autenticacion)
+Bacteriana(Bacteriana)
+Cebon(Cebon)
+Hacienda(Hacienda)
+IAutenticacion(IAutenticacion)
+ICreacionVacuna(ICreacionVacuna)
+IVacunacion(IVacunacion)
+IValidarInformacion(IValidarInformacion)
+IVentaRes(IVentaRes)
+InterceptorAutenticacion(InterceptorAutenticacion)
+InterceptorValidarInformacion(InterceptorValidarInformacion)
+Novillo(Novillo)
+Potrero(Potrero)
+PublisherPesoMin(PublisherPesoMin)
+PublisherPesoVenta(PublisherPesoVenta)
+PublisherPotreroLleno(PublisherPotreroLleno)
+PublisherPotreroMitad(PublisherPotreroMitad)
+PublisherVacunaVencida(PublisherVacunaVencida)
+PublisherVacunacionCompletada(PublisherVacunacionCompletada)
+ReglaPotrero(ReglaPotrero)
+ReglaRes(ReglaRes)
+ReglaVacuna(ReglaVacuna)
+Res(Res)
+Ternero(Ternero)
+Usuario(Usuario)
+Vacuna(Vacuna)
+Validacion(Validacion)
+ValidadorPotrero(ValidadorPotrero)
+ValidadorRes(ValidadorRes)
+ValidadorVacuna(ValidadorVacuna)
+ValidadorVenta(ValidadorVenta)
+Venta(Venta)
+Viva(Viva)
+dele_peso_min(dele_peso_min)
+dele_peso_venta(dele_peso_venta)
+dele_vacuna_vencida(dele_vacuna_vencida)
+dele_vacunacion_completada(dele_vacunacion_completada)
+delegado_potrero_lleno(delegado_potrero_lleno)
+delegado_potrero_mitad(delegado_potrero_mitad)
+enum_l_atenuaciones(enum_l_atenuaciones)
+l_tipos_potreros(l_tipos_potreros)
+
+Autenticacion  -..-|>  IAutenticacion 
+Autenticacion  -->  Usuario 
+Autenticacion  -->  Usuario 
+Bacteriana  -->  ReglaVacuna 
+Bacteriana  -..-|>  Vacuna 
+Bacteriana  -->  Vacuna 
+Cebon  -->  ReglaRes 
+Cebon  -->  Res 
+Cebon  -..-|>  Res 
+Hacienda  -->  Bacteriana 
+Hacienda  -->  Cebon 
+Hacienda  -..-|>  ICreacionVacuna 
+Hacienda  -..-|>  IVacunacion 
+Hacienda  -..-|>  IVentaRes 
+Hacienda  -->  Novillo 
+Hacienda  -->  Potrero 
+Hacienda  -->  Potrero 
+Hacienda  -..->  PublisherPesoMin 
+Hacienda  -->  PublisherPesoMin 
+Hacienda  -->  PublisherPesoVenta 
+Hacienda  -..->  PublisherPesoVenta 
+Hacienda  -->  PublisherVacunaVencida 
+Hacienda  -..->  PublisherVacunaVencida 
+Hacienda  -->  PublisherVacunacionCompletada 
+Hacienda  -..->  PublisherVacunacionCompletada 
+Hacienda  -->  ReglaVacuna 
+Hacienda  -->  Res 
+Hacienda  -->  Ternero 
+Hacienda  -->  Vacuna 
+Hacienda  -->  Venta 
+Hacienda  -->  Viva 
+Hacienda  -->  enum_l_atenuaciones 
+Hacienda  -->  l_tipos_potreros 
+IAutenticacion  -->  Usuario 
+ICreacionVacuna  -->  Viva 
+ICreacionVacuna  -->  enum_l_atenuaciones 
+IVacunacion  -->  Vacuna 
+IValidarInformacion  -->  Potrero 
+IValidarInformacion  -->  Res 
+IValidarInformacion  -->  Vacuna 
+IValidarInformacion  -->  Venta 
+InterceptorAutenticacion  -->  Usuario 
+Novillo  -->  ReglaRes 
+Novillo  -->  Res 
+Novillo  -..-|>  Res 
+Potrero  -->  Cebon 
+Potrero  -->  Novillo 
+Potrero  -..->  PublisherPesoMin 
+Potrero  -->  PublisherPesoMin 
+Potrero  -->  PublisherPesoVenta 
+Potrero  -..->  PublisherPesoVenta 
+Potrero  -..->  PublisherPotreroLleno 
+Potrero  -->  PublisherPotreroLleno 
+Potrero  -..->  PublisherPotreroMitad 
+Potrero  -->  PublisherPotreroMitad 
+Potrero  -->  ReglaPotrero 
+Potrero  -->  ReglaRes 
+Potrero  -->  Res 
+Potrero  -->  Res 
+Potrero  -->  Ternero 
+Potrero  --*  l_tipos_potreros 
+Potrero  -->  l_tipos_potreros 
+Potrero  -..->  l_tipos_potreros 
+Potrero  -->  l_tipos_potreros 
+PublisherPesoMin  -->  Cebon 
+PublisherPesoMin  -->  Novillo 
+PublisherPesoMin  -->  PublisherPesoMin 
+PublisherPesoMin  -->  PublisherPesoVenta 
+PublisherPesoMin  -->  ReglaRes 
+PublisherPesoMin  -->  Res 
+PublisherPesoMin  -->  Ternero 
+PublisherPesoMin  -..->  dele_peso_min 
+PublisherPesoVenta  -->  Cebon 
+PublisherPesoVenta  -->  Novillo 
+PublisherPesoVenta  -->  ReglaRes 
+PublisherPesoVenta  -->  Res 
+PublisherPesoVenta  -->  Ternero 
+PublisherPesoVenta  -..->  dele_peso_venta 
+PublisherPotreroLleno  -->  Potrero 
+PublisherPotreroLleno  -->  ReglaPotrero 
+PublisherPotreroLleno  -..->  delegado_potrero_lleno 
+PublisherPotreroMitad  -->  Potrero 
+PublisherPotreroMitad  -->  ReglaPotrero 
+PublisherPotreroMitad  -..->  delegado_potrero_mitad 
+PublisherVacunaVencida  -->  Vacuna 
+PublisherVacunaVencida  -..->  dele_vacuna_vencida 
+PublisherVacunacionCompletada  -->  Cebon 
+PublisherVacunacionCompletada  -->  Novillo 
+PublisherVacunacionCompletada  -->  ReglaVacuna 
+PublisherVacunacionCompletada  -->  Res 
+PublisherVacunacionCompletada  -->  Ternero 
+PublisherVacunacionCompletada  -..->  dele_vacunacion_completada 
+Res  -->  Vacuna 
+Ternero  -->  ReglaRes 
+Ternero  -->  Res 
+Ternero  -..-|>  Res 
+Validacion  -..-|>  IValidarInformacion 
+Validacion  -->  Potrero 
+Validacion  -->  Res 
+Validacion  -->  Vacuna 
+Validacion  -->  Venta 
+ValidadorPotrero  -->  Potrero 
+ValidadorPotrero  -->  Res 
+ValidadorPotrero  -->  Vacuna 
+ValidadorPotrero  -..-|>  Validacion 
+ValidadorPotrero  -->  Venta 
+ValidadorRes  -->  Potrero 
+ValidadorRes  -->  Res 
+ValidadorRes  -->  Vacuna 
+ValidadorRes  -..-|>  Validacion 
+ValidadorRes  -->  Venta 
+ValidadorVacuna  -->  Potrero 
+ValidadorVacuna  -->  Res 
+ValidadorVacuna  -->  Vacuna 
+ValidadorVacuna  -..-|>  Validacion 
+ValidadorVacuna  -->  Venta 
+ValidadorVenta  -->  Potrero 
+ValidadorVenta  -->  Res 
+ValidadorVenta  -->  Vacuna 
+ValidadorVenta  -..-|>  Validacion 
+ValidadorVenta  -->  Venta 
+Venta  -..->  Potrero 
+Venta  -->  Potrero 
+Venta  --*  Potrero 
+Venta  -->  Potrero 
+Venta  --*  Res 
+Venta  -..->  Res 
+Venta  -->  Res 
+Venta  -->  Res 
+Viva  -..-|>  Vacuna 
+Viva  -->  Vacuna 
+Viva  -..->  enum_l_atenuaciones 
+Viva  --*  enum_l_atenuaciones 

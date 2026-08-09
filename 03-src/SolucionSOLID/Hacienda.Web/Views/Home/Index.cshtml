@@ -1,0 +1,192 @@
+﻿@{
+  ViewData["Title"] = "Inicio - HaciendaSoft";
+}
+
+<div class="container-fluid p-0">
+    <!-- Hero Section con diseño mejorado -->
+    <div class="hero-section text-center text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--aw-green) 0%, var(--aw-green-dark) 100%); padding: 100px 20px 80px; border-radius: 0 0 50% 50% / 0 0 40px 40px;">
+        <div class="container">
+            <div class="row justify-content-center">
+     <div class="col-lg-8">
+         <span class="material-icons-outlined mb-3" style="font-size: 4rem; opacity: 0.9;">grass</span>
+    <h1 class="display-3 fw-bold mb-3 aw-reveal" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.2);">
+             Bienvenido a HaciendaSoft
+        </h1>
+      <p class="lead fs-4 mb-4 aw-reveal" style="transition-delay: .1s; opacity: 0.95;">
+        La solución integral para la gestión inteligente de tu hacienda ganadera.
+      </p>
+         <div class="d-flex justify-content-center gap-3 aw-reveal" style="transition-delay: .2s;">
+             <a asp-controller="Res" asp-action="Index" class="btn btn-light btn-lg px-4 rounded-pill shadow">
+    <span class="material-icons-outlined" style="font-size: 1.2rem; vertical-align: sub;">pets</span>
+     Ver Reses
+   </a>
+      <a asp-controller="Potrero" asp-action="Index" class="btn btn-outline-light btn-lg px-4 rounded-pill">
+      <span class="material-icons-outlined" style="font-size: 1.2rem, vertical-align: sub;">fence</span>
+      Ver Potreros
+         </a>
+           </div>
+  </div>
+</div>
+        </div>
+        <!-- Decoración de fondo -->
+        <div class="position-absolute" style="bottom: -50px; right: -50px; opacity: 0.1;">
+<span class="material-icons-outlined" style="font-size: 20rem;">pets</span>
+      </div>
+    </div>
+
+    <!-- Módulos del Sistema -->
+    <div class="container my-5 py-4">
+        <div class="text-center mb-5">
+    <h2 class="display-6 fw-bold mb-2" style="color: var(--aw-green);">Módulos del Sistema</h2>
+    <p class="text-muted">Accede rápidamente a todas las funcionalidades</p>
+        </div>
+        
+        <div class="row g-4">
+      <!-- Módulo Potreros -->
+         <div class="col-md-6 col-lg-4 aw-reveal">
+        <a asp-controller="Potrero" asp-action="Index" class="text-decoration-none">
+ <div class="aw-card h-100 p-4 text-center position-relative overflow-hidden">
+         <div class="mb-3">
+                  <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #E8F5E9, #C8E6C9);">
+             <span class="material-icons-outlined" style="font-size: 2.5rem; color: var(--aw-green);">fence</span>
+      </div>
+          </div>
+               <h3 class="h4 fw-bold mb-2" style="color: var(--aw-text);">Potreros</h3>
+               <p class="text-muted mb-3">Organiza y gestiona los espacios por tipo de ganado</p>
+       <span class="material-icons-outlined position-absolute" style="bottom: 10px; right: 10px; color: var(--aw-green); opacity: 0.3;">arrow_forward</span>
+          </div>
+        </a>
+            </div>
+
+     <!-- Módulo Reses -->
+  <div class="col-md-6 col-lg-4 aw-reveal" style="transition-delay: .1s;">
+                <a asp-controller="Res" asp-action="Index" class="text-decoration-none">
+       <div class="aw-card h-100 p-4 text-center position-relative overflow-hidden">
+         <div class="mb-3">
+          <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #FFF3E0, #FFE0B2);">
+<span class="material-icons-outlined" style="font-size: 2.5rem; color: #8b4513;">pets</span>
+               </div>
+   </div>
+  <h3 class="h4 fw-bold mb-2" style="color: var(--aw-text);">Reses</h3>
+        <p class="text-muted mb-3">Registra y controla el desarrollo de tu ganado</p>
+   <span class="material-icons-outlined position-absolute" style="bottom: 10px; right: 10px; color: #8b4513; opacity: 0.3;">arrow_forward</span>
+        </div>
+      </a>
+            </div>
+
+            <!-- Módulo Vacunas -->
+            <div class="col-md-6 col-lg-4 aw-reveal" style="transition-delay: .2s;">
+       <a asp-controller="Vacuna" asp-action="Index" class="text-decoration-none">
+        <div class="aw-card h-100 p-4 text-center position-relative overflow-hidden">
+  <div class="mb-3">
+    <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #E3F2FD, #BBDEFB);">
+ <span class="material-icons-outlined" style="font-size: 2.5rem; color: #1976d2;">vaccines</span>
+       </div>
+  </div>
+  <h3 class="h4 fw-bold mb-2" style="color: var(--aw-text);">Vacunas</h3>
+       <p class="text-muted mb-3">Controla el esquema de vacunación completo</p>
+ <span class="material-icons-outlined position-absolute" style="bottom: 10px; right: 10px; color: #1976d2; opacity: 0.3;">arrow_forward</span>
+     </div>
+       </a>
+ </div>
+
+            <!-- Módulo Ventas -->
+ <div class="col-md-6 col-lg-4 aw-reveal" style="transition-delay: .3s;">
+             <a asp-controller="Venta" asp-action="Index" class="text-decoration-none">
+               <div class="aw-card h-100 p-4 text-center position-relative overflow-hidden">
+                  <div class="mb-3">
+          <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #E8F5E9, #C8E6C9);">
+          <span class="material-icons-outlined" style="font-size: 2.5rem; color: var(--aw-green);">paid</span>
+       </div>
+               </div>
+      <h3 class="h4 fw-bold mb-2" style="color: var(--aw-text);">Ventas</h3>
+            <p class="text-muted mb-3">Historial y estadísticas financieras</p>
+   <span class="material-icons-outlined position-absolute" style="bottom: 10px; right: 10px; color: var(--aw-green); opacity: 0.3;">arrow_forward</span>
+      </div>
+        </a>
+            </div>
+
+            <!-- Módulo Usuarios -->
+            <div class="col-md-6 col-lg-4 aw-reveal" style="transition-delay: .4s;">
+      <a asp-controller="Usuario" asp-action="Index" class="text-decoration-none">
+     <div class="aw-card h-100 p-4 text-center position-relative overflow-hidden">
+             <div class="mb-3">
+      <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #F3E5F5, #E1BEE7);">
+             <span class="material-icons-outlined" style="font-size: 2.5rem; color: #6a1b9a;">group</span>
+      </div>
+               </div>
+       <h3 class="h4 fw-bold mb-2" style="color: var(--aw-text);">Usuarios</h3>
+                   <p class="text-muted mb-3">Administra los usuarios del sistema</p>
+      <span class="material-icons-outlined position-absolute" style="bottom: 10px; right: 10px; color: #6a1b9a; opacity: 0.3;">arrow_forward</span>
+     </div>
+                </a>
+ </div>
+
+    <!-- Accesos Rápidos -->
+       <div class="col-md-6 col-lg-4 aw-reveal" style="transition-delay: .5s;">
+     <div class="aw-card h-100 p-4 text-center" style="background: linear-gradient(135deg, #FFF8E1, #FFECB3);">
+     <div class="mb-3">
+          <span class="material-icons-outlined" style="font-size: 2.5rem; color: #F57C00;">flash_on</span>
+         </div>
+              <h3 class="h4 fw-bold mb-3" style="color: var(--aw-text);">Accesos Rápidos</h3>
+   <div class="d-grid gap-2">
+    <a asp-controller="Potrero" asp-action="Create" class="btn aw-btn aw-btn-secondary btn-sm">+ Crear Potrero</a>
+       <a asp-controller="Res" asp-action="Create" class="btn aw-btn aw-btn-secondary btn-sm">+ Agregar Res</a>
+    <a asp-controller="Vacuna" asp-action="Aplicar" class="btn aw-btn aw-btn-primary btn-sm">Aplicar Vacuna</a>
+     </div>
+         </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Noticias y Consejos -->
+    <div class="py-5" style="background: linear-gradient(180deg, transparent, var(--aw-green-soft));">
+        <div class="container">
+       <div class="text-center mb-5">
+              <h2 class="display-6 fw-bold mb-2" style="color: var(--aw-green);">Noticias y Consejos del Agro</h2>
+ <p class="text-muted">Mantente informado sobre las mejores prácticas</p>
+            </div>
+ 
+            <div class="row g-4">
+       <div class="col-md-4 aw-reveal">
+             <div class="aw-card h-100 overflow-hidden">
+          <img src="~/imagenes/pasto.jpg" class="img-fluid w-100" style="height: 200px; object-fit: cover;" alt="Optimización de Pasturas">
+             <div class="p-4">
+ <h5 class="fw-bold mb-2">Optimización de Pasturas</h5>
+  <p class="text-muted small">Técnicas de rotación de potreros para maximizar el forraje y mantener la salud del suelo.</p>
+         </div>
+</div>
+     </div>
+    <div class="col-md-4 aw-reveal" style="transition-delay: .1s;">
+       <div class="aw-card h-100 overflow-hidden">
+         <img src="~/imagenes/vaca.webp" class="img-fluid w-100" style="height: 200px; object-fit: cover;" alt="Bienestar Animal">
+         <div class="p-4">
+          <h5 class="fw-bold mb-2">Bienestar Animal</h5>
+     <p class="text-muted small">El manejo tranquilo del ganado mejora la producción y reduce el estrés en los animales.</p>
+    </div>
+         </div>
+                </div>
+   <div class="col-md-4 aw-reveal" style="transition-delay: .2s;">
+  <div class="aw-card h-100 overflow-hidden">
+                        <img src="~/imagenes/tecnologia.jpg" class="img-fluid w-100" style="height: 200px; object-fit: cover;" alt="Tecnología en el Campo">
+<div class="p-4">
+     <h5 class="fw-bold mb-2">Tecnología en el Campo</h5>
+       <p class="text-muted small">Decisiones basadas en datos para optimizar recursos y mejorar la eficiencia operativa.</p>
+     </div>
+           </div>
+         </div>
+   </div>
+   </div>
+    </div>
+</div>
+
+<style>
+    .hero-section {
+        animation: fadeIn 0.8s ease-in;
+    }
+    
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>

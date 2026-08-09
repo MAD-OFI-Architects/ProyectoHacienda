@@ -1,0 +1,129 @@
+@using Hacienda.Domain.Entities
+
+@{
+    ViewData["Title"] = "Aplicar Vacuna";
+    var potreros = ViewBag.Potreros as List<Potrero>;
+    var reses = ViewBag.Reses as List<(Potrero Potrero, Res Res)>;
+    var vacunas = ViewBag.Vacunas as List<Vacuna>;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Encabezado -->
+            <div class="aw-page-header mb-4">
+                <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+                    Aplicar Vacuna a Res
+                </h1>
+                <p class="text-muted mb-0">Registra la aplicaci�n de una vacuna a una res.</p>
+            </div>
+
+            <!-- Mensaje de error -->
+            @if (ViewBag.Mensaje != null)
+            {
+                <div class="alert alert-@ViewBag.TipoMensaje alert-dismissible fade show" role="alert">
+                    <strong>@ViewBag.Mensaje</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Formulario -->
+            <div class="aw-card aw-reveal">
+                <div class="aw-card-header">Datos de Aplicaci�n</div>
+                <div class="card-body p-4">
+                    <form asp-action="Aplicar" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="potreroId" class="form-label fw-bold">Potrero</label>
+                                <select name="potreroId" id="selectPotrero" class="form-select form-select-lg" required>
+                                    <option value="">-- Seleccione --</option>
+                                    @if (potreros != null)
+                                    {
+                                        @foreach (var p in potreros)
+                                        {
+                                            <option value="@p.Identificacion">@p.Identificacion (@p.Reses.Count reses)</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="nombreRes" class="form-label fw-bold">Res</label>
+                                <select name="nombreRes" id="selectRes" class="form-select form-select-lg" required>
+                                    <option value="">-- Seleccione potrero --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="loteVacuna" class="form-label fw-bold">Vacuna a Aplicar</label>
+                            <select name="loteVacuna" class="form-select form-select-lg" required>
+                                <option value="">-- Seleccione --</option>
+                                @if (vacunas != null)
+                                {
+                                    @foreach (var v in vacunas.Where(vac => vac.FechaVencimiento >= DateTime.Now))
+                                    {
+                                         <option value="@v.Lote">@v.Nombre (@v.Lote) - @v.Categoria</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        
+                        <div id="infoRes" class="alert alert-info" style="display: none;"></div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-end mt-4">
+                            <a asp-action="Index" class="btn aw-btn aw-btn-secondary me-2">Cancelar</a>
+                            <button type="submit" class="btn aw-btn aw-btn-primary">Aplicar Vacuna</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const resesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                (reses ?? new List<(Potrero, Res)>()).Select(r => new {
+                    potrero = r.Potrero.Identificacion.ToString(),
+                    nombre = r.Res.Nombre,
+                    tipo = r.Res.GetType().Name,
+                    vacunas = r.Res.VacunasAplicadas.Count
+                }).ToList()
+            ));
+
+            const selectPotrero = document.getElementById('selectPotrero');
+            const selectRes = document.getElementById('selectRes');
+            const infoRes = document.getElementById('infoRes');
+
+            selectPotrero.addEventListener('change', function() {
+                const potreroId = this.value;
+                selectRes.innerHTML = '<option value="">-- Seleccione res --</option>';
+                infoRes.style.display = 'none';
+
+                if (potreroId) {
+                    const resesFiltradas = resesData.filter(r => r.potrero === potreroId);
+                    resesFiltradas.forEach(res => {
+                        const option = new Option(`${res.nombre} (${res.tipo})`, res.nombre);
+                        option.dataset.info = `Tipo: ${res.tipo}, Vacunas: ${res.vacunas}`;
+                        selectRes.add(option);
+                    });
+                }
+            });
+
+            selectRes.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (selectedOption && selectedOption.dataset.info) {
+                    infoRes.textContent = selectedOption.dataset.info;
+                    infoRes.style.display = 'block';
+                } else {
+                    infoRes.style.display = 'none';
+                }
+            });
+        });
+    </script>
+}

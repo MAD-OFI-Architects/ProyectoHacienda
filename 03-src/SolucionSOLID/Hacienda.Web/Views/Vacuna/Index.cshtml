@@ -1,0 +1,110 @@
+﻿@using Hacienda.Domain.Entities
+@using Hacienda.Domain.Enums
+@model List<Vacuna>
+
+@{
+ ViewData["Title"] = "💉 Gestión de Vacunas";
+ var estadisticas = ViewBag.Estadisticas as Dictionary<string, object>;
+}
+
+<div class="container mt-4">
+ <!-- Encabezado -->
+ <div class="aw-page-header mb-4 d-flex justify-content-between align-items-center">
+ <div>
+ <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+ 💉 Gestión de Vacunas
+ </h1>
+ <p class="text-muted mb-0">Administra el inventario de vacunas de la hacienda</p>
+ </div>
+ <div>
+ <a asp-action="Create" class="btn aw-btn aw-btn-secondary shadow-sm me-2">
+ <span class="material-icons-outlined" style="font-size: 1.2rem; vertical-align: sub;">add</span>
+ Crear Vacuna
+ </a>
+ <a asp-action="Aplicar" class="btn aw-btn aw-btn-primary shadow-sm">
+ <span class="material-icons-outlined" style="font-size: 1.2rem; vertical-align: sub;">vaccines</span>
+ Aplicar Vacuna
+ </a>
+ </div>
+ </div>
+
+ <!-- Mensaje de éxito/error -->
+ @if (TempData["Mensaje"] != null)
+ {
+ <div class="alert alert-@TempData["TipoMensaje"] alert-dismissible fade show" role="alert">
+ <strong>@TempData["Mensaje"]</strong>
+ <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+ </div>
+ }
+
+ <!-- Tarjetas de estadísticas -->
+ @if (estadisticas != null)
+ {
+ <div class="row g-3 mb-4">
+ <div class="col aw-reveal"><div class="aw-card h-100 text-center p-3"><div class="text-muted small">Total Vacunas</div><div class="fw-bold fs-3">@estadisticas["TotalVacunas"]</div></div></div>
+ <div class="col aw-reveal" style="transition-delay: .1s;"><div class="aw-card h-100 text-center p-3"><div class="text-muted small">Bacterianas</div><div class="fw-bold fs-3">@estadisticas["Bacterianas"]</div></div></div>
+ <div class="col aw-reveal" style="transition-delay: .2s;"><div class="aw-card h-100 text-center p-3"><div class="text-muted small">Vivas</div><div class="fw-bold fs-3">@estadisticas["Vivas"]</div></div></div>
+ <div class="col aw-reveal" style="transition-delay: .3s;"><div class="aw-card h-100 text-center p-3"><div class="text-muted small">Vigentes</div><div class="fw-bold fs-3">@estadisticas["Vigentes"]</div></div></div>
+ <div class="col aw-reveal" style="transition-delay: .4s;"><div class="aw-card h-100 text-center p-3"><div class="text-muted small">Vencidas</div><div class="fw-bold fs-3">@estadisticas["Vencidas"]</div></div></div>
+ </div>
+ }
+
+ <!-- Tabla de vacunas -->
+ @if (Model != null && Model.Any())
+ {
+ <div class="aw-card mt-3 aw-reveal" style="transition-delay: .5s;">
+ <div class="p-3">
+ <table class="table table-hover aw-table align-middle">
+ <thead>
+ <tr>
+ <th>Nombre</th>
+ <th>Lote</th>
+ <th>Tipo</th>
+ <th>F. Vencimiento</th>
+ <th>F. Aplicación</th>
+ <th>Detalle</th>
+ <th class="text-center">Estado</th>
+ </tr>
+ </thead>
+ <tbody>
+ @foreach (var vacuna in Model)
+ {
+ var estaVencida = vacuna.FechaVencimiento < DateTime.Now;
+ <tr class="@(estaVencida ? "table-danger" : "")">
+ <td class="fw-semibold">@vacuna.Nombre</td>
+ <td>@vacuna.Lote</td>
+  <td>
+  @switch (vacuna.Categoria)
+  {
+      case VacunaCategoria.Bacteriana: <span class="aw-badge aw-badge-info">Bacteriana</span> break;
+      case VacunaCategoria.Viva: <span class="aw-badge aw-badge-warning">Viva</span> break;
+      default: <span class="aw-badge">@vacuna.Categoria</span> break;
+  }
+  </td>
+ <td>@vacuna.FechaVencimiento.ToString("dd/MM/yyyy")</td>
+ <td>@vacuna.FechaAplicacion.ToString("dd/MM/yyyy")</td>
+  <td>
+  <span class="aw-badge aw-badge-secondary">@vacuna.DetalleVisual()</span>
+  </td>
+ <td class="text-center">
+ @if (estaVencida) { <span class="aw-badge aw-badge-danger">VENCIDA</span> }
+ else { <span class="aw-badge aw-badge-success">VIGENTE</span> }
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ </div>
+ }
+ else
+ {
+ <div class="alert alert-warning text-center py-5 aw-card border-0 aw-reveal">
+ <h3>No hay vacunas en el inventario</h3>
+ <p class="lead">Comienza agregando vacunas para aplicar a las reses</p>
+ <a asp-action="Create" class="btn aw-btn aw-btn-primary btn-lg rounded-pill px-5 mt-3">
+ Crear Primera Vacuna
+ </a>
+ </div>
+ }
+</div>

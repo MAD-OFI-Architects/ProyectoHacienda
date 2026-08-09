@@ -1,0 +1,89 @@
+@using Hacienda.Domain.Entities
+@model Potrero
+
+@{
+    ViewData["Title"] = "Detalles del Potrero";
+}
+
+<div class="container mt-4">
+    <!-- Encabezado -->
+    <div class="aw-page-header mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+                Detalles del Potrero
+            </h1>
+            <p class="text-muted mb-0">Información completa del potrero @Model.Identificacion</p>
+        </div>
+        <a asp-action="Index" class="btn aw-btn aw-btn-secondary">
+             <span class="material-icons-outlined" style="font-size: 1.2rem; vertical-align: sub;">arrow_back</span>
+            Volver al Listado
+        </a>
+    </div>
+
+    <!-- Tarjeta principal -->
+    <div class="aw-card aw-reveal">
+        <div class="aw-card-header">@Model.Identificacion</div>
+        <div class="card-body p-4">
+            <div class="row">
+                <!-- Información básica -->
+                <div class="col-md-6 mb-4">
+                    <h5 class="border-bottom pb-2" style="color: var(--aw-green);">Información Básica</h5>
+                    <dl class="row">
+                        <dt class="col-sm-5">Tipo:</dt>
+                        <dd class="col-sm-7">
+                            <span class="aw-badge aw-badge-secondary">@Model.Tipo</span>
+                        </dd>
+                    </dl>
+                </div>
+
+                <!-- Estadísticas de ocupación -->
+                <div class="col-md-6 mb-4">
+                    <h5 class="border-bottom pb-2" style="color: var(--aw-green);">Ocupación</h5>
+                    <dl class="row">
+                        <dt class="col-sm-5">Reses actuales:</dt>
+                        <dd class="col-sm-7"><strong class="fs-4">@Model.Reses.Count</strong></dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Lista de reses -->
+            @if (Model.Reses.Any())
+            {
+                <div class="mt-4">
+                    <h5 class="border-bottom pb-2" style="color: var(--aw-green);">Reses en este Potrero</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover aw-table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Tipo</th>
+                                    <th>Peso (kg)</th>
+                                    <th>Edad (meses)</th>
+                                    <th>Vacunas Aplicadas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var res in Model.Reses)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@res.Nombre</td>
+                                        <td><span class="aw-badge aw-badge-info">@res.GetType().Name</span></td>
+                                        <td>@res.Peso kg</td>
+                                        <td>@res.Edad meses</td>
+                                        <td>@res.VacunasAplicadas.Count</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mt-4">
+                    <strong>Este potrero está vacío.</strong> No hay reses registradas actualmente.
+                </div>
+            }
+        </div>
+    </div>
+</div>

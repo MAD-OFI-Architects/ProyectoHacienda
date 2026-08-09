@@ -1,0 +1,141 @@
+﻿@using Hacienda.Domain.Entities
+@model List<Usuario>
+
+@{
+    ViewData["Title"] = "👤 Gestión de Usuarios";
+    var estadisticas = ViewBag.Estadisticas as Dictionary<string, object>;
+}
+
+<div class="container mt-4">
+    <!-- Encabezado -->
+    <div class="aw-page-header mb-4 d-flex justify-content-between align-items-center">
+  <div>
+    <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+    👤 Gestión de Usuarios
+            </h1>
+    <p class="text-muted mb-0">Administra los usuarios del sistema</p>
+        </div>
+        <a asp-action="Create" class="btn aw-btn aw-btn-primary shadow-sm">
+          <span class="material-icons-outlined" style="font-size: 1.2rem; vertical-align: sub;">person_add</span>
+    Crear Usuario
+   </a>
+    </div>
+
+    <!-- Mensaje de éxito/error -->
+    @if (TempData["Mensaje"] != null)
+    {
+   <div class="alert alert-@TempData["TipoMensaje"] alert-dismissible fade show" role="alert">
+            <strong>@TempData["Mensaje"]</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+   </div>
+  }
+
+    <!-- Tarjetas de estadísticas -->
+    @if (estadisticas != null)
+    {
+        <div class="row g-3 mb-4 justify-content-center">
+   <div class="col-md-4 aw-reveal">
+         <div class="aw-card h-100 text-center p-4">
+   <div class="mb-3">
+                 <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #F3E5F5, #E1BEE7);">
+            <span class="material-icons-outlined" style="font-size: 2.5rem; color: #6a1b9a;">group</span>
+    </div>
+      </div>
+  <div class="text-muted small mb-1">Total de Usuarios</div>
+    <div class="fw-bold display-4" style="color: #6a1b9a;">@estadisticas["TotalUsuarios"]</div>
+          <small class="text-muted">Usuarios registrados en el sistema</small>
+         </div>
+            </div>
+    </div>
+    }
+
+    <!-- Tabla de usuarios -->
+  @if (Model != null && Model.Any())
+{
+ <div class="aw-card mt-3 aw-reveal" style="transition-delay: .2s;">
+            <div class="p-3">
+       <table class="table table-hover aw-table align-middle">
+  <thead>
+ <tr>
+    <th>#</th>
+        <th>Nombre de Usuario</th>
+   <th>Estado</th>
+          <th class="text-center">Información</th>
+   </tr>
+     </thead>
+ <tbody>
+           @{int contador = 1;}
+      @foreach (var usuario in Model)
+         {
+      <tr>
+      <td class="fw-bold">@contador</td>
+           <td>
+             <div class="d-flex align-items-center">
+           <div class="rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; background: linear-gradient(135deg, #E1BEE7, #CE93D8);">
+      <span class="material-icons-outlined" style="font-size: 1.5rem; color: white;">person</span>
+        </div>
+       <span class="fw-semibold">@usuario.Nombre</span>
+       </div>
+         </td>
+  <td>
+   <span class="aw-badge aw-badge-success">
+        <span class="material-icons-outlined" style="font-size: 0.9rem; vertical-align: sub;">check_circle</span>
+      Activo
+      </span>
+         </td>
+   <td class="text-center">
+                 <small class="text-muted">Usuario del sistema</small>
+         </td>
+  </tr>
+              contador++;
+    }
+         </tbody>
+      </table>
+   </div>
+        </div>
+
+  <!-- Información adicional -->
+        <div class="row mt-4 g-4">
+<div class="col-md-6 aw-reveal" style="transition-delay: .3s;">
+           <div class="aw-card h-100 p-4" style="border-left: 4px solid #9c27b0;">
+        <div class="d-flex align-items-center mb-3">
+            <span class="material-icons-outlined me-2" style="color: #9c27b0; font-size: 2rem;">lock</span>
+ <h5 class="mb-0 fw-bold">Seguridad</h5>
+                  </div>
+  <ul class="mb-0 text-muted">
+     <li>Cada usuario debe tener un nombre único</li>
+   <li>Las contraseñas se almacenan de forma segura</li>
+          <li>Se recomienda usar contraseñas fuertes</li>
+    </ul>
+     </div>
+          </div>
+            <div class="col-md-6 aw-reveal" style="transition-delay: .4s;">
+        <div class="aw-card h-100 p-4" style="border-left: 4px solid #3f51b5;">
+   <div class="d-flex align-items-center mb-3">
+    <span class="material-icons-outlined me-2" style="color: #3f51b5; font-size: 2rem;">lightbulb</span>
+ <h5 class="mb-0 fw-bold">Recomendaciones</h5>
+      </div>
+          <ul class="mb-0 text-muted">
+    <li>Crea usuarios para cada operador de la hacienda</li>
+    <li>Mantén un registro actualizado de usuarios</li>
+     <li>Revisa periódicamente los accesos al sistema</li>
+   </ul>
+        </div>
+      </div>
+        </div>
+    }
+    else
+    {
+  <div class="alert alert-warning text-center py-5 aw-card border-0 aw-reveal">
+            <div class="mb-3">
+        <span class="material-icons-outlined" style="font-size: 5rem; color: #6a1b9a; opacity: 0.5;">group_off</span>
+            </div>
+         <h3>No hay usuarios registrados</h3>
+       <p class="lead">Comienza creando el primer usuario del sistema</p>
+  <a asp-action="Create" class="btn aw-btn aw-btn-primary btn-lg rounded-pill px-5 mt-3">
+                <span class="material-icons-outlined" style="vertical-align: sub;">person_add</span>
+       Crear Primer Usuario
+            </a>
+        </div>
+    }
+</div>

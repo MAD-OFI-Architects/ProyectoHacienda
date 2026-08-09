@@ -1,0 +1,187 @@
+﻿@using Hacienda.Domain.Entities
+@using Hacienda.Domain.Enums
+@model List<Venta>
+
+@{
+    ViewData["Title"] = "💰 Registro de Ventas";
+    var estadisticas = ViewBag.Estadisticas as Dictionary<string, object>;
+}
+
+<div class="container mt-4">
+    <!-- Encabezado -->
+    <div class="aw-page-header mb-4 text-center">
+    <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+    💰 Registro de Ventas
+    </h1>
+    <p class="text-muted mb-0">Historial completo de ventas de ganado</p>
+    </div>
+
+    <!-- Mensaje de éxito/error -->
+    @if (TempData["Mensaje"] != null)
+    {
+    <div class="alert alert-@TempData["TipoMensaje"] alert-dismissible fade show" role="alert">
+    <strong>@TempData["Mensaje"]</strong>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    }
+
+    <!-- Tarjetas de estadísticas -->
+    @if (estadisticas != null)
+    {
+    <div class="row g-3 mb-4">
+    <div class="col-md-3">
+    <div class="aw-card h-100">
+    <div class="aw-card-header">Totales</div>
+    <div class="p-3 text-center">
+    <div class="text-muted small">Total Ventas</div>
+    <div class="fw-bold fs-3">@estadisticas["TotalVentas"]</div>
+    </div>
+    </div>
+    </div>
+    <div class="col-md-3">
+    <div class="aw-card h-100">
+    <div class="aw-card-header">Monto</div>
+    <div class="p-3 text-center">
+    <div class="text-muted small">Monto Total</div>
+    <div class="fw-bold fs-4">$@string.Format("{0:N0}", estadisticas["MontoTotal"])</div>
+    </div>
+    </div>
+    </div>
+    <div class="col-md-3">
+    <div class="aw-card h-100">
+    <div class="aw-card-header">Promedio</div>
+    <div class="p-3 text-center">
+    <div class="text-muted small">Promedio por Venta</div>
+    <div class="fw-bold fs-4">$@string.Format("{0:N0}", estadisticas["PromedioVenta"])</div>
+    </div>
+    </div>
+    </div>
+    <div class="col-md-3">
+    <div class="aw-card h-100">
+    <div class="aw-card-header">Este Mes</div>
+    <div class="p-3 text-center">
+    <div class="text-muted small">Ventas</div>
+    <div class="fw-bold fs-4">@estadisticas["VentasEsteMes"]</div>
+    <div class="text-muted small">$@string.Format("{0:N0}", estadisticas["MontoEsteMes"])</div>
+    </div>
+    </div>
+    </div>
+    </div>
+    }
+
+    <!-- Información -->
+    <div class="alert alert-info aw-card border-0">
+    <strong>Información:</strong> Las ventas se registran automáticamente cuando vendes una res desde la sección de Reses.
+    <a asp-controller="Res" asp-action="Index" class="a-clean">Ir a Reses →</a>
+    </div>
+
+    <!-- Tabla de ventas -->
+    @if (Model != null && Model.Any())
+    {
+    <div class="aw-card mt-3">
+    <div class="p-3">
+    <table class="table table-hover aw-table align-middle">
+    <thead>
+    <tr>
+    <th>Fecha</th>
+    <th>Res Vendida</th>
+    <th>Tipo</th>
+    <th>Peso</th>
+    <th>Potrero Origen</th>
+    <th>Monto</th>
+    <th>Precio/kg</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var venta in Model)
+    {
+    var precioKg = venta.Res.Peso > 0 ? (double)venta.Monto.Monto / venta.Res.Peso : 0;
+    <tr>
+    <td>
+    <strong>@venta.Fecha.ToString("dd/MM/yyyy")</strong><br/>
+    <small class="text-muted">@venta.Fecha.ToString("HH:mm")</small>
+    </td>
+    <td class="fw-semibold">@venta.Res.Nombre</td>
+    <td>
+    @switch (venta.Res.Tipo)
+    {
+        case TipoRes.Ternero: <span class="aw-badge aw-badge-info">Ternero</span> break;
+        case TipoRes.Cebon: <span class="aw-badge aw-badge-danger">Cebón</span> break;
+        case TipoRes.Novillo: <span class="aw-badge aw-badge-warning">Novillo</span> break;
+        default: <span class="aw-badge">@venta.Res.Tipo</span> break;
+    }
+    </td>
+    <td>@venta.Res.Peso kg</td>
+    <td>
+    <span class="aw-badge aw-badge-success">@venta.PotreroOrigen</span>
+    </td>
+    <td class="fw-bold text-success">$@string.Format("{0:N0}", venta.Monto.Monto)</td>
+    <td>
+    <small class="text-muted">$@string.Format("{0:N0}", precioKg)/kg</small>
+    </td>
+    </tr>
+    }
+    </tbody>
+    <tfoot>
+    <tr>
+    <td colspan="5" class="text-end fw-bold">TOTAL GENERAL:</td>
+    <td class="fw-bold fs-5 text-success">$@string.Format("{0:N0}", Model.Sum(v => v.Monto.Monto))</td>
+    <td></td>
+    </tr>
+    </tfoot>
+    </table>
+    </div>
+    </div>
+    
+    <!-- Resumen por mes -->
+    <div class="aw-card mt-4">
+    <div class="aw-card-header">Ventas por Mes (@DateTime.Now.Year)</div>
+    <div class="p-3">
+    <div class="row g-3">
+    @{
+    var ventasPorMes = Model
+    .Where(v => v.Fecha.Year == DateTime.Now.Year)
+    .GroupBy(v => v.Fecha.Month)
+    .OrderBy(g => g.Key)
+    .Select(g => new {
+    Mes = new DateTime(DateTime.Now.Year, g.Key,1).ToString("MMMM"),
+    Cantidad = g.Count(),
+    Monto = g.Sum(v => v.Monto.Monto)
+    });
+    }
+    @foreach (var mes in ventasPorMes)
+    {
+    <div class="col-md-4">
+    <div class="aw-card h-100">
+    <div class="p-3">
+    <h6 class="text-warning">@mes.Mes</h6>
+    <p class="mb-1"><strong>Ventas:</strong> @mes.Cantidad</p>
+    <p class="mb-0"><strong>Total:</strong> $@string.Format("{0:N0}", mes.Monto)</p>
+    </div>
+    </div>
+    </div>
+    }
+    </div>
+    </div>
+    </div>
+    }
+    else
+    {
+    <div class="alert alert-warning text-center py-5 aw-card border-0">
+    <h3>No hay ventas registradas</h3>
+    <p class="lead">Las ventas se registrarán automáticamente cuando vendas reses</p>
+    <a asp-controller="Res" asp-action="Index" class="btn aw-btn aw-btn-secondary btn-lg rounded-pill px-5 mt-3">
+    Ir a Gestión de Reses
+    </a>
+    </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+    // Auto-cerrar alertas después de 15 segundos
+    setTimeout(function() {
+    $('.alert').alert('close');
+    }, 15000);
+    </script>
+}

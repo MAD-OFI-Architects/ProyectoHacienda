@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Hacienda.Infrastructure</RootNamespace>
+    <AssemblyName>Hacienda.Infrastructure</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Hacienda.Domain\Hacienda.Domain.csproj" />
+    <ProjectReference Include="..\Hacienda.Application\Hacienda.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Dapper" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="CrossCutting\seed_data.sql" />
+  </ItemGroup>
+
+</Project>

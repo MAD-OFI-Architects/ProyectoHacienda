@@ -1,0 +1,124 @@
+﻿@using Hacienda.Domain.Entities
+
+@model List<Potrero>
+
+@{
+ ViewData["Title"] = "🌿 Gestión de Potreros";
+ var estadisticas = ViewBag.Estadisticas as Dictionary<string, object>;
+}
+
+<div class="container mt-4">
+ <!-- Encabezado -->
+ <div class="aw-page-header mb-4 d-flex justify-content-between align-items-center">
+ <div>
+ <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+ 🌿 Gestión de Potreros
+ </h1>
+ <p class="text-muted mb-0">Administra los potreros de tu hacienda ganadera</p>
+ </div>
+ <a asp-action="Create" class="btn aw-btn aw-btn-primary shadow-sm">
+ <span class="material-icons-outlined" style="font-size: 1.2rem; vertical-align: sub;">add</span>
+ Crear Potrero
+ </a>
+ </div>
+
+ <!-- Mensaje de éxito/error -->
+ @if (TempData["Mensaje"] != null)
+ {
+ <div class="alert alert-@TempData["TipoMensaje"] alert-dismissible fade show" role="alert">
+ <strong>@TempData["Mensaje"]</strong>
+ <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+ </div>
+ }
+
+ <!-- Tarjetas de estadísticas -->
+ @if (estadisticas != null)
+ {
+ <div class="row g-3 mb-4">
+ <div class="col-md-3 aw-reveal">
+ <div class="aw-card h-100">
+ <div class="aw-card-header">Totales</div>
+ <div class="p-3 text-center">
+ <div class="text-muted small">Total Potreros</div>
+ <div class="fw-bold fs-3">@estadisticas["TotalPotreros"]</div>
+ </div>
+ </div>
+ </div>
+ <div class="col-md-3 aw-reveal" style="transition-delay: .1s;">
+ <div class="aw-card h-100">
+ <div class="aw-card-header">Ocupación</div>
+ <div class="p-3 text-center">
+ <div class="text-muted small">Total Reses</div>
+ <div class="fw-bold fs-3">@estadisticas["TotalReses"]</div>
+ </div>
+ </div>
+ </div>
+ <div class="col-md-3 aw-reveal" style="transition-delay: .2s;">
+ <div class="aw-card h-100">
+ <div class="aw-card-header">Estado</div>
+ <div class="p-3 text-center">
+ <div class="text-muted small">Potreros Vacíos</div>
+ <div class="fw-bold fs-3">@estadisticas["PotrerosVacios"]</div>
+ </div>
+ </div>
+ </div>
+ <div class="col-md-3 aw-reveal" style="transition-delay: .3s;">
+ <div class="aw-card h-100">
+ <div class="aw-card-header">Estado</div>
+ <div class="p-3 text-center">
+ <div class="text-muted small">Con Reses</div>
+ <div class="fw-bold fs-3">@estadisticas["PotrerosConReses"]</div>
+ </div>
+ </div>
+ </div>
+ </div>
+ }
+
+ <!-- Tabla de potreros -->
+ @if (Model != null && Model.Any())
+ {
+ <div class="aw-card mt-3 aw-reveal" style="transition-delay: .4s;">
+ <div class="p-3">
+ <table class="table table-hover aw-table align-middle">
+ <thead>
+ <tr>
+ <th>Identificación</th>
+ <th>Tipo</th>
+ <th>Cantidad Reses</th>
+ <th class="text-center">Acciones</th>
+ </tr>
+ </thead>
+ <tbody>
+ @foreach (var potrero in Model)
+ {
+ <tr>
+ <td class="fw-semibold">@potrero.Identificacion</td>
+ <td>
+ <span class="aw-badge aw-badge-secondary">@potrero.Tipo</span>
+ </td>
+ <td>@potrero.Reses.Count</td>
+ <td class="text-center">
+ <a asp-action="Details" asp-route-id="@potrero.Identificacion" 
+ class="btn btn-sm aw-btn aw-btn-secondary" title="Ver detalles">
+ <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: sub;">visibility</span>
+ Detalles
+ </a>
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ </div>
+ }
+ else
+ {
+ <div class="alert alert-warning text-center py-5 aw-card border-0 aw-reveal">
+ <h3>No hay potreros registrados</h3>
+ <p class="lead">Comienza creando tu primer potrero para gestionar tu hacienda</p>
+ <a asp-action="Create" class="btn aw-btn aw-btn-primary btn-lg rounded-pill px-5 mt-3">
+ Crear Primer Potrero
+ </a>
+ </div>
+ }
+</div>

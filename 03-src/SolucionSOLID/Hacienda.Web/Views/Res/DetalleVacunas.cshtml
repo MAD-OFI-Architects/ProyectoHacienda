@@ -1,0 +1,68 @@
+@model List<Hacienda.Domain.Entities.Vacuna>
+@using Hacienda.Domain.Entities
+@using Hacienda.Domain.Enums
+@{
+    ViewData["Title"] = $"Vacunas aplicadas - {ViewBag.NombreRes}";
+}
+<div class="container mt-4">
+    <div class="aw-page-header mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+                Vacunas de @ViewBag.NombreRes
+            </h1>
+            <p class="text-muted mb-0">Potrero: @ViewBag.PotreroId</p>
+        </div>
+        <a asp-action="Index" class="btn aw-btn aw-btn-secondary">
+            <span class="material-icons-outlined" style="font-size: 1.2rem; vertical-align: sub;">arrow_back</span>
+            Volver
+        </a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="aw-card aw-reveal">
+            <div class="p-3">
+                <table class="table table-hover aw-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Lote</th>
+                            <th>Tipo</th>
+                            <th>Fecha Venc.</th>
+                            <th>Fecha Aplic.</th>
+                            <th>Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var v in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@v.Nombre</td>
+                                <td>@v.Lote</td>
+                                 <td>
+                                     @switch (v.Categoria)
+                                     {
+                                         case VacunaCategoria.Bacteriana: <span class="aw-badge aw-badge-info">Bacteriana</span> break;
+                                         case VacunaCategoria.Viva: <span class="aw-badge aw-badge-warning">Viva</span> break;
+                                         default: <span class="aw-badge">@v.Categoria</span> break;
+                                     }
+                                 </td>
+                                 <td>@v.FechaVencimiento.ToString("yyyy-MM-dd")</td>
+                                 <td>@v.FechaAplicacion.ToString("yyyy-MM-dd")</td>
+                                 <td>
+                                     <span class="aw-badge aw-badge-secondary">@v.DetalleVisual()</span>
+                                 </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info aw-card border-0 text-center py-5">
+            <h5>No hay vacunas aplicadas para esta res.</h5>
+        </div>
+    }
+</div>

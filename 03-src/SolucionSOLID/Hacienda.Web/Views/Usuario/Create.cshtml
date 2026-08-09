@@ -1,0 +1,164 @@
+﻿@{
+    ViewData["Title"] = "👤 Crear Usuario";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+   <div class="col-md-6">
+            <!-- Encabezado -->
+    <div class="aw-page-header mb-4">
+        <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+        👤 Crear Nuevo Usuario
+      </h1>
+        <p class="text-muted mb-0">Registra un nuevo usuario en el sistema</p>
+          </div>
+
+    <!-- Mensaje de error -->
+@if (ViewBag.Mensaje != null)
+            {
+   <div class="alert alert-@ViewBag.TipoMensaje alert-dismissible fade show" role="alert">
+      <strong>@ViewBag.Mensaje</strong>
+         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+     </div>
+     }
+
+ <!-- Formulario -->
+      <div class="aw-card aw-reveal">
+        <div class="aw-card-header">Datos del Usuario</div>
+      <div class="card-body p-4">
+<form asp-action="Create" method="post" id="formUsuario">
+     @Html.AntiForgeryToken()
+
+<!-- Nombre de Usuario -->
+      <div class="mb-4">
+        <label for="nombre" class="form-label fw-bold">Nombre de Usuario</label>
+  <div class="input-group input-group-lg">
+       <span class="input-group-text" style="background-color: var(--aw-green-light);">
+         <span class="material-icons-outlined" style="font-size: 1.5rem;">person</span>
+     </span>
+  <input name="nombre" type="text" 
+   class="form-control" 
+       placeholder="Ej: juan.perez"
+       required minlength="3" maxlength="50" />
+</div>
+    <small class="form-text text-muted">
+   Mínimo 3 caracteres, máximo 50. Solo letras, números, punto y guión bajo.
+       </small>
+            </div>
+
+           <!-- Contraseña -->
+        <div class="mb-4">
+       <label for="contrasena" class="form-label fw-bold">Contraseña</label>
+  <div class="input-group input-group-lg">
+<span class="input-group-text" style="background-color: var(--aw-green-light);">
+  <span class="material-icons-outlined" style="font-size: 1.5rem;">lock</span>
+          </span>
+   <input name="contrasena" type="password" 
+         class="form-control" id="inputPassword"
+    placeholder="••••••••" required minlength="4" />
+       <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+  <span class="material-icons-outlined">visibility</span>
+       </button>
+     </div>
+         <small class="form-text text-muted">Mínimo 4 caracteres para mayor seguridad</small>
+      </div>
+
+      <!-- Confirmar Contraseña -->
+       <div class="mb-4">
+       <label for="confirmarContrasena" class="form-label fw-bold">Confirmar Contraseña</label>
+ <div class="input-group input-group-lg">
+    <span class="input-group-text" style="background-color: var(--aw-green-light);">
+         <span class="material-icons-outlined" style="font-size: 1.5rem;">lock_clock</span>
+       </span>
+   <input type="password" class="form-control" id="inputConfirmar"
+       name="confirmarContrasena" placeholder="••••••••" required />
+    </div>
+      <small class="form-text text-danger" id="errorPassword" style="display: none;">
+<span class="material-icons-outlined" style="font-size: .9rem; vertical-align: sub;">error</span>
+ Las contraseñas no coinciden
+   </small>
+         </div>
+
+   <!-- Botones -->
+       <div class="d-flex justify-content-end mt-4">
+        <a asp-action="Index" class="btn aw-btn aw-btn-secondary me-2">Cancelar</a>
+ <button type="submit" class="btn aw-btn aw-btn-primary" id="btnSubmit">
+       <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: sub;">check</span>
+    Crear Usuario
+ </button>
+    </div>
+      </form>
+ </div>
+    </div>
+
+     <!-- Recomendaciones de seguridad -->
+       <div class="aw-card mt-4 aw-reveal" style="border-left: 4px solid #ff9800; transition-delay: .2s;">
+   <div class="card-body p-4">
+    <div class="d-flex align-items-center mb-3">
+      <span class="material-icons-outlined me-2" style="color: #ff9800; font-size: 2rem;">shield</span>
+    <h5 class="mb-0 fw-bold">Consejos de Seguridad</h5>
+     </div>
+    <ul class="mb-0 text-muted">
+   <li>Usa una contraseña única y difícil de adivinar</li>
+    <li>Combina letras mayúsculas, minúsculas y números</li>
+  <li>Evita usar información personal obvia</li>
+    <li>Cambia la contraseña periódicamente</li>
+      <li>No compartas tu contraseña con otras personas</li>
+ </ul>
+    </div>
+           </div>
+</div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Mostrar/ocultar contraseña
+        document.getElementById('togglePassword')?.addEventListener('click', function() {
+   var passwordInput = document.getElementById('inputPassword');
+ var icon = this.querySelector('.material-icons-outlined');
+   var type = passwordInput.type === 'password' ? 'text' : 'password';
+    passwordInput.type = type;
+  icon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+ });
+
+        // Validar que las contraseñas coincidan
+        function validarPasswords() {
+  var password = document.getElementById('inputPassword').value;
+ var confirmar = document.getElementById('inputConfirmar').value;
+       var errorMsg = document.getElementById('errorPassword');
+   var btnSubmit = document.getElementById('btnSubmit');
+  
+  if (confirmar && password !== confirmar) {
+      errorMsg.style.display = 'block';
+     btnSubmit.disabled = true;
+ return false;
+    } else {
+      errorMsg.style.display = 'none';
+   btnSubmit.disabled = false;
+     return true;
+  }
+ }
+
+        document.getElementById('inputPassword')?.addEventListener('input', validarPasswords);
+      document.getElementById('inputConfirmar')?.addEventListener('input', validarPasswords);
+
+   // Validar formulario antes de enviar
+        document.getElementById('formUsuario')?.addEventListener('submit', function(e) {
+       if (!validarPasswords()) {
+     e.preventDefault();
+        alert('⚠️ Las contraseñas no coinciden. Por favor verifícalas.');
+   }
+ });
+
+        // Validar formato del nombre de usuario
+        document.querySelector('input[name="nombre"]')?.addEventListener('input', function() {
+   var regex = /^[a-zA-Z0-9._-]+$/;
+        if (this.value && !regex.test(this.value)) {
+      this.setCustomValidity('Solo se permiten letras, números, punto, guión y guión bajo');
+  } else {
+    this.setCustomValidity('');
+ }
+        });
+    </script>
+}

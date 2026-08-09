@@ -1,0 +1,263 @@
+﻿@using Hacienda.Domain.Entities
+@using Hacienda.Domain.Enums
+@model List<(Potrero Potrero, Res Res)>
+
+@{
+ ViewData["Title"] = "🐄 Gestión de Reses";
+ var estadisticas = ViewBag.Estadisticas as Dictionary<string, object>;
+}
+
+<div class="container mt-4">
+ <!-- Encabezado -->
+ <div class="aw-page-header mb-4 d-flex justify-content-between align-items-center">
+ <div>
+ <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+ 🐄 Gestión de Reses
+ </h1>
+ <p class="text-muted mb-0">Administra el ganado de tu hacienda</p>
+ </div>
+ <a asp-action="Create" class="btn aw-btn aw-btn-primary shadow-sm">
+ <span class="material-icons-outlined" style="font-size: 1.2rem; vertical-align: sub;">add</span>
+ Agregar Res
+ </a>
+ </div>
+
+ <!-- Mensaje de éxito/error -->
+ @if (TempData["Mensaje"] != null)
+ {
+ <div class="alert alert-@TempData["TipoMensaje"] alert-dismissible fade show" role="alert">
+ <strong>@TempData["Mensaje"]</strong>
+ <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+ </div>
+ }
+
+ <!-- Tarjetas de estadísticas -->
+ @if (estadisticas != null)
+ {
+ <div class="row g-3 mb-4">
+ <div class="col aw-reveal"><div class="aw-card h-100 text-center p-3"><div class="text-muted small">Total Reses</div><div class="fw-bold fs-3">@estadisticas["TotalReses"]</div></div></div>
+ <div class="col aw-reveal" style="transition-delay: .1s;"><div class="aw-card h-100 text-center p-3"><div class="text-muted small">Terneros (0-12m)</div><div class="fw-bold fs-3">@estadisticas["Terneros"]</div></div></div>
+ <div class="col aw-reveal" style="transition-delay: .2s;"><div class="aw-card h-100 text-center p-3"><div class="text-muted small">Cebones (13-48m)</div><div class="fw-bold fs-3">@estadisticas["Cebones"]</div></div></div>
+ <div class="col aw-reveal" style="transition-delay: .3s;"><div class="aw-card h-100 text-center p-3"><div class="text-muted small">Novillos (49+m)</div><div class="fw-bold fs-3">@estadisticas["Novillos"]</div></div></div>
+ <div class="col aw-reveal" style="transition-delay: .4s;"><div class="aw-card h-100 text-center p-3"><div class="text-muted small">Peso Promedio</div><div class="fw-bold fs-3">@string.Format("{0:N1}", estadisticas["PesoPromedio"]) kg</div></div></div>
+ </div>
+ }
+
+ <!-- Tabla de reses -->
+ @if (Model != null && Model.Any())
+ {
+ <div class="aw-card mt-3 aw-reveal" style="transition-delay: .5s;">
+ <div class="p-3">
+ <table class="table table-hover aw-table align-middle">
+ <thead>
+ <tr>
+ <th>Nombre</th>
+ <th>Potrero</th>
+ <th>Tipo</th>
+ <th>Peso (kg)</th>
+ <th>Edad (meses)</th>
+<th>Vacunas</th>
+ <th>Chip</th>
+ <th class="text-center">Acciones</th>
+ </tr>
+ </thead>
+ <tbody>
+ @foreach (var item in Model)
+ {
+ <tr>
+ <td class="fw-semibold">@item.Res.Nombre</td>
+ <td><span class="aw-badge aw-badge-success">@item.Potrero.Identificacion</span></td>
+  <td>
+  @switch (item.Res.Tipo)
+  {
+      case TipoRes.Ternero: <span class="aw-badge aw-badge-info">Ternero</span> break;
+      case TipoRes.Cebon: <span class="aw-badge aw-badge-warning">Cebón</span> break;
+      case TipoRes.Novillo: <span class="aw-badge aw-badge-danger">Novillo</span> break;
+      default: <span class="aw-badge">@item.Res.Tipo</span> break;
+  }
+  </td>
+ <td>@item.Res.Peso kg</td>
+ <td>@item.Res.Edad meses</td>
+ <td>
+ <a asp-action="DetalleVacunas" asp-route-potreroId="@item.Potrero.Identificacion" asp-route-nombreRes="@item.Res.Nombre" class="a-clean">
+ @item.Res.VacunasAplicadas.Count
+ </a>
+ </td>
+ <td>
+ @if (item.Res.Chip != null)
+ {
+ <span class="aw-badge aw-badge-success" title="SN: @item.Res.Chip.NumeroSerie">📡 Activo</span>
+ }
+ else
+ {
+ <span class="text-muted small">Sin chip</span>
+ }
+ </td>
+ <td class="text-center">
+ <button type="button" class="btn btn-sm aw-btn aw-btn-secondary" data-bs-toggle="modal" data-bs-target="#alimentarModal" data-potrero="@item.Potrero.Identificacion" data-res="@item.Res.Nombre" title="Alimentar">
+ <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: sub;">restaurant</span>
+ </button>
+ <button type="button" class="btn btn-sm aw-btn aw-btn-primary" data-bs-toggle="modal" data-bs-target="#ventaModal" data-potrero="@item.Potrero.Identificacion" data-res="@item.Res.Nombre" data-peso="@item.Res.Peso" title="Vender">
+ <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: sub;">paid</span>
+ </button>
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ </div>
+ }
+ else
+ {
+ <div class="alert alert-warning text-center py-5 aw-card border-0 aw-reveal">
+ <h3>No hay reses registradas</h3>
+ <p class="lead">Comienza agregando tu primera res al sistema</p>
+ <a asp-action="Create" class="btn aw-btn aw-btn-primary btn-lg rounded-pill px-5 mt-3">
+ Agregar Primera Res
+ </a>
+ </div>
+ }
+</div>
+
+<!-- Modal para alimentar res -->
+<div class="modal fade" id="alimentarModal" tabindex="-1">
+ <div class="modal-dialog modal-dialog-centered">
+     <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-0" style="background: var(--aw-green-light); border-radius: 16px 16px 0 0;">
+    <h5 class="modal-title fw-bold">
+            <span class="material-icons-outlined" style="vertical-align: sub;">restaurant</span>
+     Alimentar Res
+     </h5>
+         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="Alimentar" method="post">
+           @Html.AntiForgeryToken()
+       <div class="modal-body p-4">
+        <input type="hidden" id="alimentarPotreroId" name="potreroId" />
+         <input type="hidden" id="alimentarNombreRes" name="nombreRes" />
+
+       <div class="mb-4">
+  <label class="form-label fw-bold">Res a alimentar:</label>
+    <div class="p-3 rounded" style="background: var(--aw-green-soft);">
+      <p class="mb-0 fw-bold" id="alimentarResDisplay"></p>
+        </div>
+       </div>
+
+           <div class="mb-4">
+           <label for="cantidadAlimento" class="form-label fw-bold">Cantidad de alimento:</label>
+            <select class="form-select form-select-lg" id="cantidadAlimento" name="cantidadAlimento" required>
+         <option value="1" selected>1 vez (normal)</option>
+      <option value="2">2 veces (doble ración)</option>
+    <option value="3">3 veces (triple ración)</option>
+      <option value="4">4 veces (ración especial)</option>
+     <option value="5">5 veces (máximo recomendado)</option>
+      </select>
+            <small class="form-text text-muted">Cada alimentación incrementa el peso de la res.</small>
+     </div>
+
+      <div class="alert alert-warning border-0 d-flex align-items-start" style="background: #FFF8E1;">
+              <span class="material-icons-outlined me-2" style="color: #F57C00;">info</span>
+      <div>
+        <strong>Importante:</strong> Una alimentación excesiva puede afectar la salud del animal. Se recomienda máximo 5 raciones por sesión.
+          </div>
+        </div>
+            </div>
+         <div class="modal-footer border-0 pt-0">
+    <button type="button" class="btn aw-btn aw-btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                 <button type="submit" class="btn aw-btn aw-btn-primary">
+          <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: sub;">check</span>
+    Confirmar
+   </button>
+      </div>
+            </form>
+    </div>
+    </div>
+</div>
+
+<!-- Modal para vender res -->
+<div class="modal fade" id="ventaModal" tabindex="-1">
+ <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+       <div class="modal-header border-0" style="background: var(--aw-green-light); border-radius: 16px 16px 0 0;">
+    <h5 class="modal-title fw-bold">
+   <span class="material-icons-outlined" style="vertical-align: sub;">paid</span>
+  Vender Res
+      </h5>
+     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+   </div>
+            <form asp-action="Vender" method="post">
+        @Html.AntiForgeryToken()
+    <div class="modal-body p-4">
+ <input type="hidden" id="ventaPotreroId" name="potreroId" />
+   <input type="hidden" id="ventaNombreRes" name="nombreRes" />
+
+   <div class="mb-4">
+       <label class="form-label fw-bold">Res a vender:</label>
+            <div class="p-3 rounded" style="background: var(--aw-green-soft);">
+  <p class="mb-0 fw-bold" id="ventaResDisplay"></p>
+</div>
+       </div>
+
+             <div class="mb-4">
+              <label class="form-label fw-bold">Peso actual:</label>
+        <div class="p-3 rounded" style="background: var(--aw-bg);">
+   <p class="mb-0" id="ventaPesoDisplay"></p>
+            </div>
+  </div>
+
+   <div class="mb-4">
+      <label for="monto" class="form-label fw-bold">Monto de venta (COP):</label>
+           <div class="input-group input-group-lg">
+     <span class="input-group-text" style="background: var(--aw-green-light); border: 1px solid var(--aw-border);">$</span>
+            <input type="number" class="form-control" id="monto" name="monto" min="1" required placeholder="2500000" />
+             </div>
+           <small class="form-text text-muted">Ingrese el monto total de la venta.</small>
+       </div>
+      </div>
+        <div class="modal-footer border-0 pt-0">
+    <button type="button" class="btn aw-btn aw-btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      <button type="submit" class="btn aw-btn aw-btn-primary">
+   <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: sub;">check</span>
+         Confirmar Venta
+         </button>
+   </div>
+  </form>
+   </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-cerrar alertas después de 15 segundos
+   setTimeout(function() {
+     $('.alert-dismissible').alert('close');
+        }, 15000);
+
+        // Configurar modal de alimentación
+        var alimentarModal = document.getElementById('alimentarModal');
+alimentarModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+     var potrero = button.getAttribute('data-potrero');
+       var res = button.getAttribute('data-res');
+
+            document.getElementById('alimentarPotreroId').value = potrero;
+document.getElementById('alimentarNombreRes').value = res;
+         document.getElementById('alimentarResDisplay').textContent = res + ' (Potrero: ' + potrero + ')';
+        });
+
+        // Configurar modal de venta
+        var ventaModal = document.getElementById('ventaModal');
+        ventaModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+     var potrero = button.getAttribute('data-potrero');
+var res = button.getAttribute('data-res');
+         var peso = button.getAttribute('data-peso');
+
+ document.getElementById('ventaPotreroId').value = potrero;
+         document.getElementById('ventaNombreRes').value = res;
+     document.getElementById('ventaResDisplay').textContent = res + ' (Potrero: ' + potrero + ')';
+  document.getElementById('ventaPesoDisplay').textContent = peso + ' kg';
+  });
+    </script>
+}

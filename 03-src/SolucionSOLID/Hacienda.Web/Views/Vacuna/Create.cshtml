@@ -1,0 +1,167 @@
+﻿@using Hacienda.Domain.Entities
+
+@{
+    ViewData["Title"] = "💉 Crear Vacuna";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Encabezado -->
+            <div class="aw-page-header mb-4">
+                <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+                    💉 Crear Nueva Vacuna
+                </h1>
+                <p class="text-muted mb-0">Registra una nueva vacuna en el inventario</p>
+            </div>
+
+            <!-- Mensaje de error -->
+            @if (ViewBag.Mensaje != null)
+            {
+                <div class="alert alert-@ViewBag.TipoMensaje alert-dismissible fade show" role="alert">
+                    <strong>@ViewBag.Mensaje</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Formulario -->
+            <div class="aw-card aw-reveal">
+                <div class="aw-card-header">Información de la Vacuna</div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post" id="formVacuna">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Tipo de Vacuna -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Tipo de Vacuna</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="tipoVacuna" id="tipoBacteriana" 
+                                       value="Bacteriana" checked autocomplete="off">
+                                <label class="btn btn-outline-primary btn-lg" for="tipoBacteriana">
+                                    <span class="material-icons-outlined" style="vertical-align: sub;">science</span>
+                                    Bacteriana
+                                </label>
+
+                                <input type="radio" class="btn-check" name="tipoVacuna" id="tipoViva" 
+                                       value="Viva" autocomplete="off">
+                                <label class="btn btn-outline-warning btn-lg" for="tipoViva">
+                                    <span class="material-icons-outlined" style="vertical-align: sub;">coronavirus</span>
+                                    Viva
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">Selecciona el tipo de vacuna a registrar</small>
+                        </div>
+
+                        <!-- Nombre y Lote en fila -->
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="nombre" class="form-label fw-bold">Nombre de la Vacuna</label>
+                                <input name="nombre" type="text" 
+                                       class="form-control form-control-lg" 
+                                       placeholder="Ej: Aftosa, Brucelosis" required />
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="lote" class="form-label fw-bold">Número de Lote</label>
+                                <input name="lote" type="text" 
+                                       class="form-control form-control-lg" 
+                                       placeholder="Ej: LOT-2024-001" required />
+                            </div>
+                        </div>
+
+                        <!-- Fechas en fila -->
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="fechaVencimiento" class="form-label fw-bold">Fecha de Vencimiento</label>
+                                <input name="fechaVencimiento" type="date" 
+                                       class="form-control form-control-lg" 
+                                       min="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="fechaAplicacion" class="form-label fw-bold">Fecha de Aplicación Prevista</label>
+                                <input name="fechaAplicacion" type="date" 
+                                       class="form-control form-control-lg" 
+                                       value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                            </div>
+                        </div>
+
+                        <!-- Campo específico para Bacteriana -->
+                        <div id="campoBacteriana" class="mb-4">
+                            <label for="periodoAplicacion" class="form-label fw-bold">Período de Aplicación (semanas)</label>
+                            <input name="periodoAplicacion" type="number" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="Ej: 4" min="2" max="4" />
+                            <small class="form-text text-muted">Período entre aplicaciones (2-4 semanas)</small>
+                        </div>
+
+                        <!-- Campo específico para Viva -->
+                        <div id="campoViva" class="mb-4" style="display: none;">
+                            <label for="atenuacion" class="form-label fw-bold">Nivel de Atenuación</label>
+                            <select name="atenuacion" class="form-select form-select-lg">
+                                <option value="">-- Seleccione nivel --</option>
+                                <option value="10">Atenuación 10%</option>
+                                <option value="20">Atenuación 20%</option>
+                                <option value="30">Atenuación 30%</option>
+                            </select>
+                            <small class="form-text text-muted">Porcentaje de atenuación del virus</small>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-end mt-4">
+                            <a asp-action="Index" class="btn aw-btn aw-btn-secondary me-2">Cancelar</a>
+                            <button type="submit" class="btn aw-btn aw-btn-primary">
+                                <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: sub;">check</span>
+                                Crear Vacuna
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="row mt-4 g-4">
+            <div class="col-md-6 aw-reveal" style="transition-delay: .2s;">
+                <div class="aw-card h-100 p-4" style="border-left: 4px solid #03a9f4;">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="material-icons-outlined me-2" style="color: #03a9f4; font-size: 2rem;">science</span>
+                        <h5 class="mb-0 fw-bold">Vacunas Bacterianas</h5>
+                    </div>
+                    <p class="mb-0 text-muted">
+                        Protegen contra bacterias. Se aplican periódicamente según el esquema definido. 
+                        Ejemplos: Brucelosis, Carbunco, Leptospirosis.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 aw-reveal" style="transition-delay: .3s;">
+                <div class="aw-card h-100 p-4" style="border-left: 4px solid #ffc107;">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="material-icons-outlined me-2" style="color: #ffc107; font-size: 2rem;">coronavirus</span>
+                        <h5 class="mb-0 fw-bold">Vacunas Vivas</h5>
+                    </div>
+                    <p class="mb-0 text-muted">
+                        Contienen virus atenuados. Generan inmunidad duradera. 
+                        Ejemplos: Fiebre Aftosa, IBR, DVB. Requieren condiciones especiales de almacenamiento.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+@section Scripts {
+    <script>
+    // Mostrar/ocultar campos según tipo de vacuna
+    document.querySelectorAll('input[name="tipoVacuna"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+    var esBacteriana = document.getElementById('tipoBacteriana').checked;
+                 
+    document.getElementById('campoBacteriana').style.display = esBacteriana ? 'block' : 'none';
+       document.getElementById('campoViva').style.display = esBacteriana ? 'none' : 'block';
+                 
+        // Actualizar required
+    document.querySelector('input[name="periodoAplicacion"]').required = esBacteriana;
+          document.querySelector('select[name="atenuacion"]').required = !esBacteriana;
+    });
+      });
+    </script>
+}

@@ -1,0 +1,61 @@
+﻿@{
+    ViewData["Title"] = "Crear Potrero";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Encabezado -->
+            <div class="aw-page-header mb-4">
+                <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+                    Crear Nuevo Potrero
+                </h1>
+                <p class="text-muted mb-0">Registra un nuevo potrero en tu hacienda.</p>
+            </div>
+
+            <!-- Mensaje de error -->
+            @if (ViewBag.Mensaje != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>@ViewBag.Mensaje</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Formulario -->
+            <div class="aw-card aw-reveal">
+                <div class="aw-card-header">Información del Potrero</div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Identificación -->
+                        <div class="mb-4">
+                            <label for="identificacion" class="form-label fw-bold">Identificación del Potrero</label>
+                            <input name="identificacion" class="form-control form-control-lg" placeholder="Ej: Potrero Norte, P-001" required />
+                            <small class="form-text text-muted">Nombre único para identificar el potrero.</small>
+                        </div>
+
+                        <!-- Tipo de Potrero -->
+                        <div class="mb-4">
+                            <label for="tipo" class="form-label fw-bold">Tipo de Potrero</label>
+                            <select name="tipo" class="form-select form-select-lg" required>
+                                <option value="">-- Seleccione un tipo --</option>
+                                <option value="Ternero">Ternero (0-12 meses)</option>
+                                <option value="Cebon">Cebón (13-48 meses)</option>
+                                <option value="Novillo">Novillo (49+ meses)</option>
+                            </select>
+                            <small class="form-text text-muted">Selecciona el tipo de ganado que alojará este potrero.</small>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-end mt-4">
+                            <a asp-action="Index" class="btn aw-btn aw-btn-secondary me-2">Cancelar</a>
+                            <button type="submit" class="btn aw-btn aw-btn-primary">Crear Potrero</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,79 @@
+@using Hacienda.Domain.Entities
+@{
+    ViewData["Title"] = "📍 Registrar Ubicación";
+    var chips = ViewBag.Chips as List<IChip>;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="aw-page-header mb-4">
+                <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+                    Registrar Ubicación de Chip
+                </h1>
+                <p class="text-muted mb-0">Registra las coordenadas GPS de un chip activo.</p>
+            </div>
+
+            @if (TempData["Mensaje"] != null)
+            {
+                <div class="alert alert-@TempData["TipoMensaje"] alert-dismissible fade show" role="alert">
+                    <strong>@TempData["Mensaje"]</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="aw-card aw-reveal">
+                <div class="aw-card-header">Coordenadas GPS</div>
+                <div class="card-body p-4">
+                    <form asp-action="RegistrarUbicacion" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-4">
+                            <label for="numeroSerieChip" class="form-label fw-bold">Chip</label>
+                            <select name="numeroSerieChip" id="numeroSerieChip" class="form-select form-select-lg" required>
+                                <option value="">-- Seleccione un chip activo --</option>
+                                @if (chips != null)
+                                {
+                                    foreach (var chip in chips)
+                                    {
+                                        <option value="@chip.NumeroSerie.Valor">@chip.NumeroSerie.Valor (@chip.Estado)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="latitud" class="form-label fw-bold">Latitud</label>
+                                <input type="number" class="form-control form-control-lg" id="latitud" name="latitud"
+                                       required step="0.000001" min="-90" max="90" placeholder="Ej: 4.7110" />
+                                <small class="form-text text-muted">Rango: -90 a 90</small>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="longitud" class="form-label fw-bold">Longitud</label>
+                                <input type="number" class="form-control form-control-lg" id="longitud" name="longitud"
+                                       required step="0.000001" min="-180" max="180" placeholder="Ej: -74.0721" />
+                                <small class="form-text text-muted">Rango: -180 a 180</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="precisionMetros" class="form-label fw-bold">Precisión (metros)</label>
+                            <input type="number" class="form-control form-control-lg" id="precisionMetros" name="precisionMetros"
+                                   step="0.1" min="0" placeholder="Ej: 5.0 (opcional)" />
+                            <small class="form-text text-muted">Precisión del GPS en metros. Opcional.</small>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <a asp-action="Index" class="btn aw-btn aw-btn-secondary me-2">Cancelar</a>
+                            <button type="submit" class="btn aw-btn aw-btn-primary">
+                                <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: sub;">check</span>
+                                Registrar Ubicación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

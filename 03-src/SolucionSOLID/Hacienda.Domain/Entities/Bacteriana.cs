@@ -1,0 +1,25 @@
+using Hacienda.Domain.Enums;
+
+namespace Hacienda.Domain.Entities;
+
+public class Bacteriana : Vacuna
+{
+    public uint PeriodoAplicacion { get; }
+
+    public Bacteriana(Guid id, string nombre, string lote,
+        DateTime fechaVencimiento, DateTime fechaAplicacion, uint periodoAplicacion)
+        : base(id, nombre, lote, fechaVencimiento, fechaAplicacion)
+    {
+        if (periodoAplicacion < 2 || periodoAplicacion > 4)
+            throw new ArgumentException(
+                $"Período debe estar entre 2 y 4 semanas. Recibido: {periodoAplicacion}");
+        PeriodoAplicacion = periodoAplicacion;
+    }
+
+    public override VacunaCategoria Categoria => VacunaCategoria.Bacteriana;
+
+    public override string Serializar()
+        => $"{Nombre}|{Lote}|{FechaVencimiento:yyyy-MM-dd}|{FechaAplicacion:yyyy-MM-dd}|Bacteriana|{PeriodoAplicacion}";
+
+    public override string DetalleVisual() => $"{PeriodoAplicacion} sem.";
+}

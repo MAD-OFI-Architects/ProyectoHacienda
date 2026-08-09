@@ -1,0 +1,61 @@
+# Build outputs
+bin/
+obj/
+out/
+
+# IDE / Editor
+.vs/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+coverage/
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+
+# User secrets / Secrets
+secrets.json
+appsettings.*.json
+!appsettings.json
+
+# Logs
+*.log
+logs/
+
+# Database / Data files (keep structure, ignore data)
+**/Datos/*.txt
+**/Datos/*.db
+**/Datos/*.db-journal
+!**/Datos/.gitkeep
+
+# Compiled binaries
+*.dll
+*.exe
+*.pdb
+
+# Rider / ReSharper
+_ReSharper*/
+*.dotCover
+
+# Visual Studio
+*.suo
+*.user
+*.userprefs
+
+# BenchmarkDotNet
+BenchmarkDotNet.Artifacts/
+
+# Source Generators
+*.g.cs

@@ -1,0 +1,133 @@
+@using Hacienda.Domain.Entities
+@using Hacienda.Domain.Enums
+@model List<IChip>
+@{
+    ViewData["Title"] = "📡 Gestión de Chips";
+    var ubicaciones = ViewBag.UltimasUbicaciones as List<Geolocalizacion>;
+}
+
+<div class="container mt-4">
+    <div class="aw-page-header mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+                📡 Gestión de Chips GPS
+            </h1>
+            <p class="text-muted mb-0">Administra chips de geolocalización del ganado</p>
+        </div>
+        <div>
+            <a asp-action="Instalar" class="btn aw-btn aw-btn-primary shadow-sm me-2">
+                <span class="material-icons-outlined" style="font-size: 1.2rem; vertical-align: sub;">add</span>
+                Instalar Chip
+            </a>
+            <a asp-action="RegistrarUbicacion" class="btn aw-btn aw-btn-secondary shadow-sm">
+                <span class="material-icons-outlined" style="font-size: 1.2rem; vertical-align: sub;">place</span>
+                Registrar Ubicación
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-@TempData["TipoMensaje"] alert-dismissible fade show" role="alert">
+            <strong>@TempData["Mensaje"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Tabla de Chips -->
+        <div class="col-lg-7">
+            <div class="aw-card aw-reveal">
+                <div class="aw-card-header">Chips Registrados</div>
+                <div class="p-3">
+                    @if (Model.Any())
+                    {
+                        <table class="table table-hover aw-table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Número de Serie</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Instalación</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var chip in Model)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@chip.NumeroSerie</td>
+                                        <td>
+                                            @switch (chip.Estado)
+                                            {
+                                                case EstadoChip.Activo:
+                                                    <span class="aw-badge aw-badge-success">Activo</span>
+                                                    break;
+                                                case EstadoChip.Inactivo:
+                                                    <span class="aw-badge aw-badge-warning">Inactivo</span>
+                                                    break;
+                                                case EstadoChip.Perdido:
+                                                    <span class="aw-badge aw-badge-danger">Perdido</span>
+                                                    break;
+                                                case EstadoChip.Dañado:
+                                                    <span class="aw-badge aw-badge-secondary">Dañado</span>
+                                                    break;
+                                                default:
+                                                    <span class="aw-badge">@chip.Estado</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>@chip.FechaInstalacion.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-center">
+                                            <a asp-action="Historial" asp-route-numeroSerie="@chip.NumeroSerie.Valor" class="btn btn-sm aw-btn aw-btn-secondary" title="Ver historial">
+                                                <span class="material-icons-outlined" style="font-size: 1rem;">history</span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center py-4 mb-0">
+                            <h5>No hay chips registrados</h5>
+                            <p class="mb-0">Comienza instalando un chip en una res.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Últimas Ubicaciones -->
+        <div class="col-lg-5">
+            <div class="aw-card aw-reveal" style="transition-delay: .1s;">
+                <div class="aw-card-header">Últimas Ubicaciones</div>
+                <div class="p-3">
+                    @if (ubicaciones != null && ubicaciones.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var ubi in ubicaciones.Take(10))
+                            {
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="material-icons-outlined" style="font-size: 1rem; color: var(--aw-primary);">place</span>
+                                            <span class="ms-1">@ubi.Latitud.ToString("F4"), @ubi.Longitud.ToString("F4")</span>
+                                        </div>
+                                        <small class="text-muted">@ubi.FechaHora.ToString("dd/MM HH:mm")</small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center py-3 mb-0">
+                            <small>Sin ubicaciones registradas</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

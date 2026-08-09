@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Hacienda.Application</RootNamespace>
+    <AssemblyName>Hacienda.Application</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Hacienda.Domain\Hacienda.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
