@@ -28,19 +28,18 @@ public class PotreroController : Controller
     [HttpPost]
     public IActionResult Create(string identificacion, TipoPotrero tipo)
     {
-        try
+        var resultado = _gestorPotreros.CrearPotrero(identificacion, tipo);
+
+        if (!resultado.Exito)
         {
-            string mensaje = _gestorPotreros.CrearPotrero(identificacion, tipo);
-            TempData["Mensaje"] = mensaje;
-            TempData["TipoMensaje"] = "success";
-            return RedirectToAction(nameof(Index));
-        }
-        catch (Exception ex)
-        {
-            ViewBag.Mensaje = ex.Message;
+            ViewBag.Mensaje = resultado.Mensaje;
             ViewBag.TipoMensaje = "danger";
             return View();
         }
+
+        TempData["Mensaje"] = resultado.Mensaje;
+        TempData["TipoMensaje"] = "success";
+        return RedirectToAction(nameof(Index));
     }
 
     public IActionResult Details(string id)

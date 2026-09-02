@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hacienda.Application.Interfaces;
+using Hacienda.Application.Results;
 using Hacienda.Domain.Entities;
 using Hacienda.Domain.Enums;
 
@@ -45,29 +46,24 @@ public class VacunaController : Controller
     {
         try
         {
-            string mensaje;
-            if (tipoVacuna == "Bacteriana")
+            var resultado = tipoVacuna == "Bacteriana"
+                ? (periodoAplicacion.HasValue
+                    ? _servicioVacunacion.CrearVacunaBacteriana(nombre, lote, fechaVencimiento, fechaAplicacion, periodoAplicacion.Value)
+                    : ResultadoOperacion.Fallo("El período de aplicación es requerido"))
+                : (atenuacion.HasValue
+                    ? _servicioVacunacion.CrearVacunaViva(nombre, lote, fechaVencimiento, fechaAplicacion, atenuacion.Value)
+                    : ResultadoOperacion.Fallo("La atenuación es requerida"));
+
+            if (!resultado.Exito)
             {
-                if (!periodoAplicacion.HasValue)
-                {
-                    ViewBag.Mensaje = "El período de aplicación es requerido";
-                    ViewBag.TipoMensaje = "danger";
-                    return View();
-                }
-                mensaje = _servicioVacunacion.CrearVacunaBacteriana(nombre, lote, fechaVencimiento, fechaAplicacion, periodoAplicacion.Value);
-            }
-            else
-            {
-                if (!atenuacion.HasValue)
-                {
-                    ViewBag.Mensaje = "La atenuación es requerida";
-                    ViewBag.TipoMensaje = "danger";
-                    return View();
-                }
-                mensaje = _servicioVacunacion.CrearVacunaViva(nombre, lote, fechaVencimiento, fechaAplicacion, atenuacion.Value);
+                ViewBag.Mensaje = resultado.Mensaje;
+                ViewBag.TipoMensaje = "danger";
+                ViewBag.TiposVacuna = new[] { "Bacteriana", "Viva" };
+                ViewBag.Atenuaciones = Enum.GetValues<Viva.GradoAtenuacion>();
+                return View();
             }
 
-            TempData["Mensaje"] = mensaje;
+            TempData["Mensaje"] = resultado.Mensaje;
             TempData["TipoMensaje"] = "success";
             return RedirectToAction(nameof(Index));
         }
@@ -97,29 +93,32 @@ public class VacunaController : Controller
     {
         try
         {
-            string mensaje;
+            ResultadoOperacion resultado;
             if (tipoVacuna == "Bacteriana")
             {
                 if (!periodoAplicacion.HasValue)
-                {
-                    ViewBag.Mensaje = "El período de aplicación es requerido";
-                    ViewBag.TipoMensaje = "danger";
-                    return View();
-                }
-                mensaje = _servicioVacunacion.CrearLoteVacunaBacteriana(nombre, loteBase, fechaVencimiento, fechaAplicacion, periodoAplicacion.Value, cantidad);
+                    return VistaFallida("El período de aplicación es requerido");
+
+                resultado = _servicioVacunacion.CrearLoteVacunaBacteriana(nombre, loteBase, fechaVencimiento, fechaAplicacion, periodoAplicacion.Value, cantidad);
             }
             else
             {
                 if (!atenuacion.HasValue)
-                {
-                    ViewBag.Mensaje = "La atenuación es requerida";
-                    ViewBag.TipoMensaje = "danger";
-                    return View();
-                }
-                mensaje = _servicioVacunacion.CrearLoteVacunaViva(nombre, loteBase, fechaVencimiento, fechaAplicacion, atenuacion.Value, cantidad);
+                    return VistaFallida("La atenuación es requerida");
+
+                resultado = _servicioVacunacion.CrearLoteVacunaViva(nombre, loteBase, fechaVencimiento, fechaAplicacion, atenuacion.Value, cantidad);
             }
 
-            TempData["Mensaje"] = mensaje;
+            if (!resultado.Exito)
+            {
+                ViewBag.Mensaje = resultado.Mensaje;
+                ViewBag.TipoMensaje = "danger";
+                ViewBag.TiposVacuna = new[] { "Bacteriana", "Viva" };
+                ViewBag.Atenuaciones = Enum.GetValues<Viva.GradoAtenuacion>();
+                return View();
+            }
+
+            TempData["Mensaje"] = resultado.Mensaje;
             TempData["TipoMensaje"] = "success";
             return RedirectToAction(nameof(Index));
         }
@@ -148,10 +147,10 @@ public class VacunaController : Controller
     {
         try
         {
-            string mensaje = _servicioVacunacion.AplicarVacuna(loteVacuna, potreroId, nombreRes);
-            TempData["Mensaje"] = mensaje;
-            TempData["TipoMensaje"] = mensaje.Contains("exito", StringComparison.OrdinalIgnoreCase) ? "success" : "danger";
-            return RedirectToAction(nameof(Index));
+            var resultado = _servicioVacunacion.AplicarVacuna(loteVacuna, potreroId, nombreRes);
+            TempData["Mensaje"] = resultado.Mensaje;
+            TempData["TipoMensaje"] = resultado.Exito ? "success" : "danger";
+            return resultado.Exito ? RedirectToAction(nameof(Index)) : View();
         }
         catch (Exception ex)
         {
@@ -162,6 +161,15 @@ public class VacunaController : Controller
         ViewBag.Potreros = _gestorPotreros.ListarPotreros();
         ViewBag.Reses = _gestorReses.ListarReses();
         ViewBag.Vacunas = _servicioVacunacion.ListarVacunasDisponibles();
+        return View();
+    }
+
+    private IActionResult VistaFallida(string mensaje)
+    {
+        ViewBag.Mensaje = mensaje;
+        ViewBag.TipoMensaje = "danger";
+        ViewBag.TiposVacuna = new[] { "Bacteriana", "Viva" };
+        ViewBag.Atenuaciones = Enum.GetValues<Viva.GradoAtenuacion>();
         return View();
     }
 }

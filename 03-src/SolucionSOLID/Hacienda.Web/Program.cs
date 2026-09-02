@@ -48,12 +48,14 @@ builder.Services.AddScoped<IServicioVacunacion, ServicioVacunacion>();
 builder.Services.AddScoped<IServicioVentas, ServicioVentas>();
 builder.Services.AddScoped<IServicioAutenticacion, ServicioAutenticacion>();
 builder.Services.AddScoped<IAutorizador, AutorizadorRbca>();
+builder.Services.AddScoped<IResLocator, ResLocator>();
+builder.Services.AddScoped<IInstaladorChip, InstaladorChip>();
 builder.Services.AddScoped<IServicioChip, ServicioChip>();
 builder.Services.AddScoped<IServicioGeolocalizacion, ServicioGeolocalizacion>();
 
 // ── Validation (Transient) ──
-builder.Services.AddTransient<IValidarRes, ValidadorRes>();
 builder.Services.AddTransient<IValidarPotrero, ValidadorPotrero>();
+builder.Services.AddTransient<IValidarRes, ValidadorRes>();
 builder.Services.AddTransient<IValidarVacuna, ValidadorVacuna>();
 builder.Services.AddTransient<IValidarVenta, ValidadorVenta>();
 

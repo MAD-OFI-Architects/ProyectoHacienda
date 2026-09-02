@@ -147,13 +147,7 @@ public class RepositorioPotreroSqlite : IRepositorioPotrero
         var edad = (ushort)(long)row.edad;
         var tipo = (string)row.tipo;
 
-        return tipo switch
-        {
-            "Ternero" => new Ternero(id, nombre, peso, edad),
-            "Novillo" => new Novillo(id, nombre, peso, edad),
-            "Cebon" => new Cebon(id, nombre, peso, edad),
-            _ => throw new InvalidOperationException($"Tipo de res desconocido: {tipo}")
-        };
+        return CatalogoRes.CrearDesdeNombre(id, nombre, peso, edad, tipo);
     }
 
     internal static void CargarChipSiExiste(Res res, dynamic row, SqliteConnection conn)
@@ -168,7 +162,7 @@ public class RepositorioPotreroSqlite : IRepositorioPotrero
 
         if (chipRow != null)
         {
-            res.Chip = RepositorioChipSqlite.MapearChip(chipRow);
+            res.InstalarChip(RepositorioChipSqlite.MapearChip(chipRow));
         }
     }
 }

@@ -40,55 +40,39 @@ public class ResController : Controller
     [HttpPost]
     public IActionResult Create(string potreroId, string nombre, ushort edad, uint peso)
     {
-        try
+        var resultado = _gestorReses.AgregarRes(potreroId, nombre, edad, peso);
+
+        if (!resultado.Exito)
         {
-            string mensaje = _gestorReses.AgregarRes(potreroId, nombre, edad, peso);
-            TempData["Mensaje"] = mensaje;
-            TempData["TipoMensaje"] = "success";
-            return RedirectToAction(nameof(Index));
-        }
-        catch (Exception ex)
-        {
-            ViewBag.Mensaje = ex.Message;
+            ViewBag.Mensaje = resultado.Mensaje;
             ViewBag.TipoMensaje = "danger";
+            ViewBag.Potreros = _gestorPotreros.ListarPotreros();
+            ViewBag.TiposRes = Enum.GetValues<TipoRes>();
+            return View();
         }
 
-        ViewBag.Potreros = _gestorPotreros.ListarPotreros();
-        ViewBag.TiposRes = Enum.GetValues<TipoRes>();
-        return View();
+        TempData["Mensaje"] = resultado.Mensaje;
+        TempData["TipoMensaje"] = "success";
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
     public IActionResult Alimentar(string potreroId, string nombreRes, uint cantidadAlimento = 1)
     {
-        try
-        {
-            string mensaje = _gestorReses.AlimentarRes(potreroId, nombreRes, cantidadAlimento);
-            TempData["Mensaje"] = mensaje;
-            TempData["TipoMensaje"] = "success";
-        }
-        catch (Exception ex)
-        {
-            TempData["Mensaje"] = ex.Message;
-            TempData["TipoMensaje"] = "danger";
-        }
+        var resultado = _gestorReses.AlimentarRes(potreroId, nombreRes, cantidadAlimento);
+
+        TempData["Mensaje"] = resultado.Mensaje;
+        TempData["TipoMensaje"] = resultado.Exito ? "success" : "danger";
         return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
     public IActionResult Vender(string potreroId, string nombreRes, decimal monto)
     {
-        try
-        {
-            string mensaje = _servicioVentas.VenderRes(potreroId, nombreRes, monto);
-            TempData["Mensaje"] = mensaje;
-            TempData["TipoMensaje"] = "success";
-        }
-        catch (Exception ex)
-        {
-            TempData["Mensaje"] = ex.Message;
-            TempData["TipoMensaje"] = "danger";
-        }
+        var resultado = _servicioVentas.VenderRes(potreroId, nombreRes, monto);
+
+        TempData["Mensaje"] = resultado.Mensaje;
+        TempData["TipoMensaje"] = resultado.Exito ? "success" : "danger";
         return RedirectToAction(nameof(Index));
     }
 
@@ -97,6 +81,13 @@ public class ResController : Controller
         try
         {
             var potrero = _gestorPotreros.BuscarPotrero(potreroId);
+            if (potrero == null)
+            {
+                TempData["Mensaje"] = $"Potrero '{potreroId}' no encontrado";
+                TempData["TipoMensaje"] = "danger";
+                return RedirectToAction(nameof(Index));
+            }
+
             var res = potrero.BuscarRes(nombreRes);
             if (res == null)
             {

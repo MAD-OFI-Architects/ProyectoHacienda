@@ -1,10 +1,11 @@
 using Hacienda.Application.Interfaces;
+using Hacienda.Application.Results;
 using Hacienda.Domain.Entities;
 using Hacienda.Domain.Enums;
+using Hacienda.Domain.Events;
 using Hacienda.Domain.Factories;
 using Hacienda.Domain.Interfaces;
-using Hacienda.Domain.Results;
-using Hacienda.Domain.Events;
+using Hacienda.Domain.ValueObjects;
 
 namespace Hacienda.Application.Services;
 
@@ -33,22 +34,19 @@ public class GestorReses : IGestorReses
         _reloj = reloj;
     }
 
-    public string AgregarRes(string potreroId, string nombre, ushort edad, uint peso)
+    public ResultadoOperacion AgregarRes(string potreroId, string nombre, ushort edad, uint peso)
     {
         var potreros = _repoPotrero.ObtenerTodos();
-        var potrero = potreros.FirstOrDefault(p => p.Identificacion.Valor.Equals(potreroId, StringComparison.OrdinalIgnoreCase))
-            ?? throw new InvalidOperationException($"Potrero '{potreroId}' no encontrado");
-
-        if (potrero.BuscarRes(nombre) != null)
-            throw new InvalidOperationException($"Ya existe una res '{nombre}' en el potrero '{potreroId}'");
+        var potrero = potreros.FirstOrDefault(p => p.Identificacion.Valor.Equals(potreroId, StringComparison.OrdinalIgnoreCase));
+        if (potrero is null)
+            return ResultadoOperacion.Fallo($"Potrero '{potreroId}' no encontrado");
 
         TipoRes tipo = MapearTipoRes(potrero.Tipo);
-
         Res res = _fabricaRes.Crear(tipo, nombre, peso, edad);
 
         var validacion = _validador.Validar(res);
         if (!validacion.EsValido)
-            return string.Join("; ", validacion.Errores);
+            return ResultadoOperacion.Fallo(validacion.Errores);
 
         potrero.AgregarRes(res);
 
@@ -76,21 +74,24 @@ public class GestorReses : IGestorReses
 
         _repoPotrero.GuardarTodos(potreros);
 
-        return $"La res '{nombre}' fue añadida al potrero '{potreroId}'.{mensajeEventos}";
+        return ResultadoOperacion.Ok($"La res '{nombre}' fue añadida al potrero '{potreroId}'.{mensajeEventos}");
     }
 
-    public string AlimentarRes(string potreroId, string nombreRes)
+    public ResultadoOperacion AlimentarRes(string potreroId, string nombreRes)
         => AlimentarRes(potreroId, nombreRes, 1);
 
-    public string AlimentarRes(string potreroId, string nombreRes, uint cantidad)
+    public ResultadoOperacion AlimentarRes(string potreroId, string nombreRes, uint cantidad)
     {
         var potreros = _repoPotrero.ObtenerTodos();
-        var potrero = potreros.FirstOrDefault(p => p.Identificacion.Valor.Equals(potreroId, StringComparison.OrdinalIgnoreCase))
-            ?? throw new InvalidOperationException($"Potrero '{potreroId}' no encontrado");
-        var res = potrero.BuscarRes(nombreRes)
-            ?? throw new InvalidOperationException($"Res '{nombreRes}' no encontrada");
+        var potrero = potreros.FirstOrDefault(p => p.Identificacion.Valor.Equals(potreroId, StringComparison.OrdinalIgnoreCase));
+        if (potrero is null)
+            return ResultadoOperacion.Fallo($"Potrero '{potreroId}' no encontrado");
 
-        res.Peso += cantidad;
+        var res = potrero.BuscarRes(nombreRes);
+        if (res is null)
+            return ResultadoOperacion.Fallo($"Res '{nombreRes}' no encontrada");
+
+        res.Alimentar(cantidad);
 
         string mensajeEventos = "";
         if (res.Peso < res.PesoMinimo)
@@ -106,7 +107,7 @@ public class GestorReses : IGestorReses
 
         _repoPotrero.GuardarTodos(potreros);
 
-        return $"La res '{res.Nombre}' fue alimentada, ahora pesa {res.Peso} kg.{mensajeEventos}";
+        return ResultadoOperacion.Ok($"La res '{res.Nombre}' fue alimentada, ahora pesa {res.Peso} kg.{mensajeEventos}");
     }
 
     public List<(Potrero Potrero, Res Res)> ListarReses()
@@ -134,11 +135,5 @@ public class GestorReses : IGestorReses
         };
     }
 
-    private static TipoRes MapearTipoRes(TipoPotrero tipoPotrero) => tipoPotrero switch
-    {
-        TipoPotrero.Ternero => TipoRes.Ternero,
-        TipoPotrero.Cebon => TipoRes.Cebon,
-        TipoPotrero.Novillo => TipoRes.Novillo,
-        _ => throw new ArgumentException($"Tipo de potrero no reconocido: {tipoPotrero}")
-    };
+    private static TipoRes MapearTipoRes(TipoPotrero tipoPotrero) => CatalogoRes.MapearDesdePotrero(tipoPotrero);
 }

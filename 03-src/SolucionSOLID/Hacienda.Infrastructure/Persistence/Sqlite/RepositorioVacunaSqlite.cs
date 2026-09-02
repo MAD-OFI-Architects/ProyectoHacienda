@@ -87,7 +87,7 @@ public class RepositorioVacunaSqlite : IRepositorioVacuna
             if (res == null) continue;
 
             var vacuna = MapearVacuna(row);
-            res.VacunasAplicadas.Add(vacuna);
+            res.RegistrarVacunaEnHistorial(vacuna);
         }
     }
 

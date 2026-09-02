@@ -37,7 +37,7 @@ public class FabricaVacuna : IVacunaFactory
             throw new ArgumentException("Nombre vacío", nameof(nombre));
         if (string.IsNullOrWhiteSpace(lote))
             throw new ArgumentException("Lote vacío", nameof(lote));
-        if (fechaVenc <= fechaAplic)
-            throw new ArgumentException("El vencimiento debe ser posterior a la aplicación");
+        if (fechaVenc < fechaAplic)
+            throw new ArgumentException("El vencimiento no puede ser anterior a la aplicación");
     }
 }

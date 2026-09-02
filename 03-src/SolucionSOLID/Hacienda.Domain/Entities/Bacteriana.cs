@@ -1,4 +1,5 @@
 using Hacienda.Domain.Enums;
+using Hacienda.Domain.Reglas;
 
 namespace Hacienda.Domain.Entities;
 
@@ -10,7 +11,7 @@ public class Bacteriana : Vacuna
         DateTime fechaVencimiento, DateTime fechaAplicacion, uint periodoAplicacion)
         : base(id, nombre, lote, fechaVencimiento, fechaAplicacion)
     {
-        if (periodoAplicacion < 2 || periodoAplicacion > 4)
+        if (periodoAplicacion < ParametrosVacuna.PeriodoAplicacionMin || periodoAplicacion > ParametrosVacuna.PeriodoAplicacionMax)
             throw new ArgumentException(
                 $"Período debe estar entre 2 y 4 semanas. Recibido: {periodoAplicacion}");
         PeriodoAplicacion = periodoAplicacion;

@@ -18,13 +18,13 @@ public class RepositorioChipSqlite : IRepositorioChip
         _guidProvider = guidProvider;
     }
 
-    public List<IChip> ObtenerTodos()
+    public List<Chip> ObtenerTodos()
     {
         using var conn = new SqliteConnection(_connectionString);
         conn.Open();
 
         var rows = conn.Query<dynamic>("SELECT * FROM chips");
-        var chips = new List<IChip>();
+        var chips = new List<Chip>();
 
         foreach (var row in rows)
         {
@@ -35,7 +35,7 @@ public class RepositorioChipSqlite : IRepositorioChip
         return chips;
     }
 
-    public IChip? ObtenerPorNumeroSerie(string numeroSerie)
+    public Chip? ObtenerPorNumeroSerie(string numeroSerie)
     {
         using var conn = new SqliteConnection(_connectionString);
         conn.Open();
@@ -49,7 +49,7 @@ public class RepositorioChipSqlite : IRepositorioChip
         return MapearChip(row);
     }
 
-    public void Guardar(IChip chip)
+    public void Guardar(Chip chip)
     {
         using var conn = new SqliteConnection(_connectionString);
         conn.Open();
@@ -66,7 +66,7 @@ public class RepositorioChipSqlite : IRepositorioChip
             });
     }
 
-    public void GuardarTodos(List<IChip> chips)
+    public void GuardarTodos(List<Chip> chips)
     {
         using var conn = new SqliteConnection(_connectionString);
         conn.Open();
@@ -92,14 +92,14 @@ public class RepositorioChipSqlite : IRepositorioChip
         tx.Commit();
     }
 
-    internal static IChip MapearChip(dynamic row)
+    internal static Chip MapearChip(dynamic row)
     {
         var id = Guid.Parse((string)row.id);
         var numeroSerie = new NumeroSerieChip((string)row.numero_serie);
         var fechaInstalacion = DateTime.Parse((string)row.fecha_instalacion);
         var estado = (EstadoChip)(byte)(long)row.estado;
 
-        var chip = Chip.Crear(id, numeroSerie, fechaInstalacion);
+        var chip = new Chip(id, numeroSerie, fechaInstalacion);
 
         if (estado != EstadoChip.Activo)
         {

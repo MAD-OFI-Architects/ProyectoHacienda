@@ -12,8 +12,17 @@ public class Usuario
 
     public Usuario(Guid id, string nombre, Credencial credencial, RolUsuario rol)
     {
+        if (id == Guid.Empty)
+            throw new ArgumentException("El identificador del usuario no puede ser vacío", nameof(id));
+
+        if (string.IsNullOrWhiteSpace(nombre))
+            throw new ArgumentException("El nombre del usuario no puede estar vacío", nameof(nombre));
+
+        if (credencial == null)
+            throw new ArgumentNullException(nameof(credencial));
+
         Id = id;
-        Nombre = nombre;
+        Nombre = nombre.Trim();
         Credencial = credencial;
         Rol = rol;
     }

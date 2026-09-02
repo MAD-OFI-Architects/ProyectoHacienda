@@ -1,4 +1,5 @@
 using Hacienda.Application.Interfaces;
+using Hacienda.Application.Results;
 using Hacienda.Domain.Entities;
 using Hacienda.Domain.Factories;
 using Hacienda.Domain.Interfaces;
@@ -29,19 +30,22 @@ public class ServicioVentas : IServicioVentas
         _reloj = reloj;
     }
 
-    public string VenderRes(string potreroId, string nombreRes, decimal monto)
+    public ResultadoOperacion VenderRes(string potreroId, string nombreRes, decimal monto)
     {
         var potreros = _repoPotrero.ObtenerTodos();
-        var potrero = potreros.FirstOrDefault(p => p.Identificacion.Valor.Equals(potreroId, StringComparison.OrdinalIgnoreCase))
-            ?? throw new InvalidOperationException($"Potrero '{potreroId}' no encontrado");
-        var res = potrero.BuscarRes(nombreRes)
-            ?? throw new InvalidOperationException($"Res '{nombreRes}' no encontrada");
+        var potrero = potreros.FirstOrDefault(p => p.Identificacion.Valor.Equals(potreroId, StringComparison.OrdinalIgnoreCase));
+        if (potrero is null)
+            return ResultadoOperacion.Fallo($"Potrero '{potreroId}' no encontrado");
+
+        var res = potrero.BuscarRes(nombreRes);
+        if (res is null)
+            return ResultadoOperacion.Fallo($"Res '{nombreRes}' no encontrada");
 
         Venta venta = _fabricaVenta.Crear(res, potreroId, monto, _reloj);
 
         var validacion = _validador.Validar(venta);
         if (!validacion.EsValido)
-            return string.Join("; ", validacion.Errores);
+            return ResultadoOperacion.Fallo(validacion.Errores);
 
         potrero.RemoverRes(res);
 
@@ -50,7 +54,7 @@ public class ServicioVentas : IServicioVentas
         _repoVenta.GuardarTodas(ventas);
         _repoPotrero.GuardarTodos(potreros);
 
-        return $"Venta de la res '{nombreRes}' realizada con éxito por {monto:C}.";
+        return ResultadoOperacion.Ok($"Venta de la res '{nombreRes}' realizada con éxito por {monto:C}.");
     }
 
     public List<Venta> ListarVentas()

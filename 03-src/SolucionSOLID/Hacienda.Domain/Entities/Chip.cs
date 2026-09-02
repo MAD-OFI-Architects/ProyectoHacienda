@@ -1,75 +1,55 @@
 using Hacienda.Domain.Enums;
+using Hacienda.Domain.Reglas;
 using Hacienda.Domain.ValueObjects;
-using System;
 
 namespace Hacienda.Domain.Entities;
 
-public class Chip : IChip
+/// <summary>
+/// Entidad con invariantes de dominio: el chip valida su propia creación y transición.
+/// La regla de negocio no vive en el servicio ni en un factory ad hoc.
+/// </summary>
+public class Chip
 {
+    private static readonly DateTime FechaMinimaValida = new(2000, 1, 1);
+
     public Guid Id { get; }
     public NumeroSerieChip NumeroSerie { get; }
     public DateTime FechaInstalacion { get; }
     public EstadoChip Estado { get; private set; }
 
-    private Chip(Guid id, NumeroSerieChip numeroSerie, DateTime fechaInstalacion)
+    public Chip(Guid id, NumeroSerieChip numeroSerie, DateTime fechaInstalacion)
     {
+        if (id == Guid.Empty)
+            throw new ArgumentException("El identificador del chip no puede ser vacío", nameof(id));
+
+        if (fechaInstalacion > DateTime.UtcNow.AddMinutes(1))
+            throw new ArgumentException("La fecha de instalación no puede ser futura", nameof(fechaInstalacion));
+
+        if (fechaInstalacion < FechaMinimaValida)
+            throw new ArgumentException("La fecha de instalación no puede ser anterior al año 2000", nameof(fechaInstalacion));
+
         Id = id;
         NumeroSerie = numeroSerie;
         FechaInstalacion = fechaInstalacion;
         Estado = EstadoChip.Activo;
     }
 
-    public static Chip Crear(Guid id, NumeroSerieChip numeroSerie, DateTime fechaInstalacion)
-    {
-        if (fechaInstalacion > DateTime.UtcNow.AddMinutes(1))
-            throw new ArgumentException("La fecha de instalación no puede ser futura", nameof(fechaInstalacion));
-
-        if (fechaInstalacion < new DateTime(2000, 1, 1))
-            throw new ArgumentException("La fecha de instalación no puede ser anterior al año 2000", nameof(fechaInstalacion));
-
-        return new Chip(id, numeroSerie, fechaInstalacion);
-    }
-
+    /// <summary>
+    /// Mutación encapsulada del estado: valida la transición dentro del propio agregado.
+    /// </summary>
     public void CambiarEstado(EstadoChip nuevoEstado)
     {
         if (!Enum.IsDefined(typeof(EstadoChip), nuevoEstado))
-            throw new ArgumentException($"Estado de chip inválido: {nuevoEstado}", nameof(nuevoEstado));
+            throw new ArgumentOutOfRangeException(nameof(nuevoEstado), nuevoEstado, "Estado de chip inválido");
 
-        if (Estado == nuevoEstado)
-            return;
-
-        // Validaciones de transición de estado
-        ValidarTransicionEstado(nuevoEstado);
+        if (Estado != nuevoEstado && !TransicionesChip.Permite(Estado, nuevoEstado))
+            throw new InvalidOperationException(
+                $"Transición de estado no permitida: de {Estado} a {nuevoEstado}. " +
+                "Contacte al administrador para transiciones especiales.");
 
         Estado = nuevoEstado;
     }
 
-    private void ValidarTransicionEstado(EstadoChip nuevoEstado)
-    {
-        // Reglas de negocio para transiciones válidas
-        switch (Estado)
-        {
-            case EstadoChip.Activo:
-                if (nuevoEstado == EstadoChip.Perdido || nuevoEstado == EstadoChip.Dañado || nuevoEstado == EstadoChip.Inactivo)
-                    return;
-                break;
-            case EstadoChip.Inactivo:
-                if (nuevoEstado == EstadoChip.Activo || nuevoEstado == EstadoChip.Perdido || nuevoEstado == EstadoChip.Dañado)
-                    return;
-                break;
-            case EstadoChip.Perdido:
-            case EstadoChip.Dañado:
-                // Estados terminales - solo pueden volver a Activo con autorización especial
-                if (nuevoEstado == EstadoChip.Activo)
-                    return;
-                break;
-        }
-
-        throw new InvalidOperationException(
-            $"Transición de estado no permitida: de {Estado} a {nuevoEstado}. " +
-            "Contacte al administrador para transiciones especiales.");
-    }
-
-    public override string ToString() 
+    public override string ToString()
         => $"Chip: {NumeroSerie} | Estado: {Estado} | Instalado: {FechaInstalacion:yyyy-MM-dd}";
 }

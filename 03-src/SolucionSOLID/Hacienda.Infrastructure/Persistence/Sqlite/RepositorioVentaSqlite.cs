@@ -36,13 +36,7 @@ public class RepositorioVentaSqlite : IRepositorioVenta
             var potreroOrigen = (string)row.potrero_origen;
             var monto = (decimal)row.monto;
 
-            Res res = resTipo switch
-            {
-                "Ternero" => new Ternero(_guidProvider.Nuevo(), resNombre, resPeso, resEdad),
-                "Novillo" => new Novillo(_guidProvider.Nuevo(), resNombre, resPeso, resEdad),
-                "Cebon" => new Cebon(_guidProvider.Nuevo(), resNombre, resPeso, resEdad),
-                _ => throw new InvalidOperationException($"Tipo de res desconocido: {resTipo}")
-            };
+            Res res = CatalogoRes.CrearDesdeNombre(_guidProvider.Nuevo(), resNombre, resPeso, resEdad, resTipo);
 
             ventas.Add(new Venta(id, fecha, res, potreroOrigen, new Dinero(monto)));
         }

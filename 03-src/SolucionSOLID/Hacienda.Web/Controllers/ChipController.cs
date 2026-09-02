@@ -40,18 +40,18 @@ public class ChipController : Controller
     [HttpPost]
     public IActionResult Instalar(Guid resId, string numeroSerie)
     {
-        var mensaje = _servicioChip.InstalarChip(resId, numeroSerie);
-        TempData["Mensaje"] = mensaje;
-        TempData["TipoMensaje"] = mensaje.Contains("correctamente") ? "success" : "danger";
+        var resultado = _servicioChip.InstalarChip(resId, numeroSerie);
+        TempData["Mensaje"] = resultado.Mensaje;
+        TempData["TipoMensaje"] = resultado.Exito ? "success" : "danger";
         return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
     public IActionResult CambiarEstado(string numeroSerie, EstadoChip estado)
     {
-        var mensaje = _servicioChip.CambiarEstadoChip(numeroSerie, estado);
-        TempData["Mensaje"] = mensaje;
-        TempData["TipoMensaje"] = "success";
+        var resultado = _servicioChip.CambiarEstadoChip(numeroSerie, estado);
+        TempData["Mensaje"] = resultado.Mensaje;
+        TempData["TipoMensaje"] = resultado.Exito ? "success" : "danger";
         return RedirectToAction(nameof(Index));
     }
 

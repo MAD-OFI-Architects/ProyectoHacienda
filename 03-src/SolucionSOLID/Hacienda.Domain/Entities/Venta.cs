@@ -13,10 +13,22 @@ public class Venta
 
     public Venta(Guid id, DateTime fecha, Res res, string potreroOrigen, Dinero monto)
     {
+        if (id == Guid.Empty)
+            throw new ArgumentException("El identificador de la venta no puede ser vacío", nameof(id));
+
+        if (res == null)
+            throw new ArgumentNullException(nameof(res));
+
+        if (string.IsNullOrWhiteSpace(potreroOrigen))
+            throw new ArgumentException("El potrero de origen no puede estar vacío", nameof(potreroOrigen));
+
+        if (monto == null)
+            throw new ArgumentNullException(nameof(monto));
+
         Id = id;
         Fecha = fecha;
         Res = res;
-        PotreroOrigen = potreroOrigen;
+        PotreroOrigen = potreroOrigen.Trim();
         Monto = monto;
     }
 }

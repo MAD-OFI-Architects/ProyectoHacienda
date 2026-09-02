@@ -35,10 +35,10 @@ public class ServicioGeolocalizacion : IServicioGeolocalizacion
         if (chip.Estado != EstadoChip.Activo)
             return $"El chip {numeroSerieChip} no está activo (estado: {chip.Estado})";
 
-        if (latitud < -90 || latitud > 90)
+        if (!Geolocalizacion.EsLatitudValida(latitud))
             return "Latitud inválida (debe estar entre -90 y 90)";
 
-        if (longitud < -180 || longitud > 180)
+        if (!Geolocalizacion.EsLongitudValida(longitud))
             return "Longitud inválida (debe estar entre -180 y 180)";
 
         var geo = new Geolocalizacion(

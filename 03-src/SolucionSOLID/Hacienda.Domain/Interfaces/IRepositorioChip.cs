@@ -4,8 +4,8 @@ namespace Hacienda.Domain.Interfaces;
 
 public interface IRepositorioChip
 {
-    List<IChip> ObtenerTodos();
-    IChip? ObtenerPorNumeroSerie(string numeroSerie);
-    void Guardar(IChip chip);
-    void GuardarTodos(List<IChip> chips);
+    List<Chip> ObtenerTodos();
+    Chip? ObtenerPorNumeroSerie(string numeroSerie);
+    void Guardar(Chip chip);
+    void GuardarTodos(List<Chip> chips);
 }

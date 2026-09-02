@@ -1,4 +1,5 @@
 using Hacienda.Application.Interfaces;
+using Hacienda.Application.Results;
 using Hacienda.Domain.Entities;
 using Hacienda.Domain.Enums;
 using Hacienda.Domain.Factories;
@@ -26,22 +27,22 @@ public class GestorPotreros : IGestorPotreros
         _fabricaPotrero = fabricaPotrero;
     }
 
-    public string CrearPotrero(string identificacion, TipoPotrero tipo)
+    public ResultadoOperacion CrearPotrero(string identificacion, TipoPotrero tipo)
     {
         if (_repoPotrero.ObtenerPorIdentificacion(identificacion) != null)
-            throw new InvalidOperationException($"Ya existe un potrero '{identificacion}'");
+            return ResultadoOperacion.Fallo($"Ya existe un potrero '{identificacion}'");
 
         var potrero = _fabricaPotrero.Crear(identificacion, tipo);
 
         var validacion = _validador.Validar(potrero);
         if (!validacion.EsValido)
-            return string.Join("; ", validacion.Errores);
+            return ResultadoOperacion.Fallo(validacion.Errores);
 
         var potreros = _repoPotrero.ObtenerTodos();
         potreros.Add(potrero);
         _repoPotrero.GuardarTodos(potreros);
 
-        return $"El potrero '{identificacion}' se añadió con éxito.";
+        return ResultadoOperacion.Ok($"El potrero '{identificacion}' se añadió con éxito.");
     }
 
     public Potrero? BuscarPotrero(string identificacion)
