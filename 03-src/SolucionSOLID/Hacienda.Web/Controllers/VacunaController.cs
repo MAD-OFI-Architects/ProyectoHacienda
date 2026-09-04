@@ -48,7 +48,8 @@ public class VacunaController : Controller
         try
         {
             // P-02: una sola puerta — la categoría del DatosVacuna decide la fábrica (sin ternario por string).
-            var categoria = tipoVacuna == "Bacteriana" ? VacunaCategoria.Bacteriana : VacunaCategoria.Viva;
+            if (!Enum.TryParse<VacunaCategoria>(tipoVacuna, true, out var categoria))
+                categoria = VacunaCategoria.Bacteriana;
             var datos = new DatosVacuna(categoria, nombre, lote, fechaVencimiento, fechaAplicacion, periodoAplicacion, atenuacion);
             var resultado = _servicioVacunacion.CrearVacuna(datos);
 
