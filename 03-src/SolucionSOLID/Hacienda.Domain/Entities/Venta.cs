@@ -11,7 +11,14 @@ public class Venta
     public string PotreroOrigen { get; }
     public Dinero Monto { get; }
 
+    public IReadOnlyList<VentaItem> Items { get; }
+
     public Venta(Guid id, DateTime fecha, Res res, string potreroOrigen, Dinero monto)
+        : this(id, fecha, res, potreroOrigen, monto, Array.Empty<VentaItem>())
+    {
+    }
+
+    internal Venta(Guid id, DateTime fecha, Res res, string potreroOrigen, Dinero monto, IReadOnlyList<VentaItem> items)
     {
         if (id == Guid.Empty)
             throw new ArgumentException("El identificador de la venta no puede ser vacío", nameof(id));
@@ -30,5 +37,6 @@ public class Venta
         Res = res;
         PotreroOrigen = potreroOrigen.Trim();
         Monto = monto;
+        Items = items;
     }
 }

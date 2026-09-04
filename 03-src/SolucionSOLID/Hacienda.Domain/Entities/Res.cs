@@ -1,4 +1,5 @@
 using Hacienda.Domain.Enums;
+using Hacienda.Domain.Interfaces;
 using Hacienda.Domain.Events;
 using Hacienda.Domain.ValueObjects;
 using System;
@@ -11,7 +12,7 @@ namespace Hacienda.Domain.Entities;
 /// Raíz del agregado ganadero. Encapsulamiento real:
 /// setters privados, colecciones de solo lectura y mutación por métodos con regla.
 /// </summary>
-public abstract class Res
+public abstract class Res : IVendible
 {
     public Guid Id { get; }
     public string Nombre { get; }
@@ -116,6 +117,22 @@ public abstract class Res
                 $"No se pueden aplicar más vivas a '{Nombre}' (máximo {MaxVacunasVivas})");
 
         _vacunasAplicadas.Add(vacuna);
+    }
+
+    /// <summary>Descripción para venta multi-ítem (contrato IVendible, SC-1).</summary>
+    public string Descripcion => Nombre;
+
+    /// <summary>
+    /// Validación de integridad post-construcción (P-04): los textos congelados del
+    /// ValidadorRes viven aquí, con su dueño. Los checks imposibles (Guid/Nombre) ya
+    /// los garantiza el esqueleto de creación y se eliminaron.
+    /// </summary>
+    public IReadOnlyList<string> ValidarIntegridad()
+    {
+        var errores = new List<string>();
+        if (Peso == 0) errores.Add("El peso de la res debe ser mayor a 0");
+        if (Edad == 0) errores.Add("La edad de la res debe ser mayor a 0");
+        return errores;
     }
 
     /// <summary>Registro mecánico para rehidratación desde persistencia (sin reglas).</summary>

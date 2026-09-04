@@ -2,9 +2,9 @@ using Hacienda.Application.Interfaces;
 using Hacienda.Application.Results;
 using Hacienda.Domain.Entities;
 using Hacienda.Domain.Enums;
-using Hacienda.Domain.Events;
 using Hacienda.Domain.Factories;
 using Hacienda.Domain.Interfaces;
+using Hacienda.Domain.Events;
 
 namespace Hacienda.Application.Services;
 
@@ -12,160 +12,117 @@ public class ServicioVacunacion : IServicioVacunacion
 {
     private readonly IRepositorioVacuna _repoVacuna;
     private readonly IRepositorioPotrero _repoPotrero;
-    private readonly IVacunaFactory _fabricaVacuna;
+    private readonly IRegistroDeVacunas _registroVacunas;
     private readonly IDomainEventPublisher _eventPublisher;
     private readonly TimeProvider _reloj;
 
     public ServicioVacunacion(
         IRepositorioVacuna repoVacuna,
         IRepositorioPotrero repoPotrero,
-        IVacunaFactory fabricaVacuna,
+        IRegistroDeVacunas registroVacunas,
         IDomainEventPublisher eventPublisher,
         TimeProvider reloj)
     {
         _repoVacuna = repoVacuna;
         _repoPotrero = repoPotrero;
-        _fabricaVacuna = fabricaVacuna;
+        _registroVacunas = registroVacunas;
         _eventPublisher = eventPublisher;
         _reloj = reloj;
     }
 
-    public ResultadoOperacion CrearVacunaBacteriana(string nombre, string lote,
-        DateTime fechaVenc, DateTime fechaAplic, uint periodo)
+    /// <summary>Una sola puerta de creación (P-02): la categoría del DatosVacuna decide la fábrica.</summary>
+    public ResultadoOperacion CrearVacuna(DatosVacuna datos)
     {
-        try
-        {
-            var vacunas = _repoVacuna.ObtenerTodas();
-            ValidarLoteNoDuplicado(vacunas, lote);
+        var vacunas = _repoVacuna.ObtenerTodas();
+        if (vacunas.Any(v => v.Lote.Equals(datos.Lote, StringComparison.OrdinalIgnoreCase)))
+            throw new InvalidOperationException($"Ya existe una vacuna con lote '{datos.Lote}'");
 
-            var vacuna = _fabricaVacuna.CrearBacteriana(nombre, lote, fechaVenc, fechaAplic, periodo);
-            vacunas.Add(vacuna);
-            _repoVacuna.GuardarTodas(vacunas);
+        var errores = _registroVacunas.Validar(datos);
+        if (errores.Count > 0)
+            return ResultadoOperacion.Fallo(errores);
 
-            return ResultadoOperacion.Ok($"Vacuna bacteriana '{nombre}' (lote '{lote}') agregada al inventario.");
-        }
-        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
-        {
-            return ResultadoOperacion.Fallo(ex.Message);
-        }
-    }
+        var vacuna = _registroVacunas.Crear(datos);
+        vacunas.Add(vacuna);
+        _repoVacuna.GuardarTodas(vacunas);
 
-    public ResultadoOperacion CrearVacunaViva(string nombre, string lote,
-        DateTime fechaVenc, DateTime fechaAplic, Viva.GradoAtenuacion atenuacion)
-    {
-        try
-        {
-            var vacunas = _repoVacuna.ObtenerTodas();
-            ValidarLoteNoDuplicado(vacunas, lote);
-
-            var vacuna = _fabricaVacuna.CrearViva(nombre, lote, fechaVenc, fechaAplic, atenuacion);
-            vacunas.Add(vacuna);
-            _repoVacuna.GuardarTodas(vacunas);
-
-            return ResultadoOperacion.Ok($"Vacuna viva '{nombre}' (lote '{lote}') agregada al inventario.");
-        }
-        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
-        {
-            return ResultadoOperacion.Fallo(ex.Message);
-        }
+        var categoria = datos.Categoria == VacunaCategoria.Bacteriana ? "bacteriana" : "viva";
+        return ResultadoOperacion.Ok($"Vacuna {categoria} '{datos.Nombre}' (lote '{datos.Lote}') agregada al inventario.");
     }
 
     public ResultadoOperacion CrearLoteVacunaBacteriana(string nombre, string loteBase,
         DateTime fechaVenc, DateTime fechaAplic, uint periodo, uint cantidad)
     {
-        try
-        {
-            ValidarCantidadLote(cantidad);
-
-            var vacunas = _repoVacuna.ObtenerTodas();
-            var vacunasCreadas = 0;
-
-            for (var i = 1; i <= cantidad; i++)
-            {
-                var loteNumerado = $"{loteBase}-{i:D3}";
-                if (vacunas.Any(v => v.Lote.Equals(loteNumerado, StringComparison.OrdinalIgnoreCase)))
-                    continue;
-
-                vacunas.Add(_fabricaVacuna.CrearBacteriana(nombre, loteNumerado, fechaVenc, fechaAplic, periodo));
-                vacunasCreadas++;
-            }
-
-            if (vacunasCreadas == 0)
-                throw new InvalidOperationException("No se pudo crear ninguna vacuna. Todos los lotes ya existen");
-
-            _repoVacuna.GuardarTodas(vacunas);
-
-            return ResultadoOperacion.Ok($"Lote de vacunas bacterianas creado: {vacunasCreadas} de {cantidad}. " +
-               $"Lotes: {loteBase}-001 a {loteBase}-{vacunasCreadas:D3}. Período: {periodo} semanas.");
-        }
-        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
-        {
-            return ResultadoOperacion.Fallo(ex.Message);
-        }
+        var datos = new DatosVacuna(VacunaCategoria.Bacteriana, nombre, loteBase, fechaVenc, fechaAplic, periodo);
+        var (creadas, ultimoLote) = CrearLote(datos, cantidad);
+        return ResultadoOperacion.Ok(
+            $"Lote de vacunas bacterianas creado: {creadas} de {cantidad}. " +
+            $"Lotes: {loteBase}-001 a {ultimoLote}. Período: {periodo} semanas.");
     }
 
     public ResultadoOperacion CrearLoteVacunaViva(string nombre, string loteBase,
         DateTime fechaVenc, DateTime fechaAplic, Viva.GradoAtenuacion atenuacion, uint cantidad)
     {
-        try
-        {
-            ValidarCantidadLote(cantidad);
+        var datos = new DatosVacuna(VacunaCategoria.Viva, nombre, loteBase, fechaVenc, fechaAplic, null, atenuacion);
+        var (creadas, ultimoLote) = CrearLote(datos, cantidad);
+        return ResultadoOperacion.Ok(
+            $"Lote de vacunas vivas creado: {creadas} de {cantidad}. " +
+            $"Lotes: {loteBase}-001 a {ultimoLote}. Atenuación: {(byte)atenuacion}.");
+    }
 
-            var vacunas = _repoVacuna.ObtenerTodas();
-            var vacunasCreadas = 0;
+    /// <summary>P-10: el esqueleto del lote vive UNA vez en FabricaDeVacuna.CrearLote (Template Method).</summary>
+    private (int Creadas, string UltimoLote) CrearLote(DatosVacuna datos, uint cantidad)
+    {
+        var vacunas = _repoVacuna.ObtenerTodas();
+        var creadas = _registroVacunas.FabricaPara(datos)
+            .CrearLote(datos, cantidad, l => vacunas.Any(v => v.Lote.Equals(l, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
 
-            for (var i = 1; i <= cantidad; i++)
-            {
-                var loteNumerado = $"{loteBase}-{i:D3}";
-                if (vacunas.Any(v => v.Lote.Equals(loteNumerado, StringComparison.OrdinalIgnoreCase)))
-                    continue;
+        if (creadas.Count == 0)
+            throw new InvalidOperationException("No se pudo crear ninguna vacuna. Todos los lotes ya existen");
 
-                vacunas.Add(_fabricaVacuna.CrearViva(nombre, loteNumerado, fechaVenc, fechaAplic, atenuacion));
-                vacunasCreadas++;
-            }
+        foreach (var (_, vacuna) in creadas)
+            vacunas.Add(vacuna);
 
-            if (vacunasCreadas == 0)
-                throw new InvalidOperationException("No se pudo crear ninguna vacuna. Todos los lotes ya existen");
-
-            _repoVacuna.GuardarTodas(vacunas);
-
-            return ResultadoOperacion.Ok($"Lote de vacunas vivas creado: {vacunasCreadas} de {cantidad}. " +
-               $"Lotes: {loteBase}-001 a {loteBase}-{vacunasCreadas:D3}. Atenuación: {(byte)atenuacion}.");
-        }
-        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
-        {
-            return ResultadoOperacion.Fallo(ex.Message);
-        }
+        _repoVacuna.GuardarTodas(vacunas);
+        return (creadas.Count, creadas[^1].Lote);
     }
 
     public ResultadoOperacion AplicarVacuna(string loteVacuna, string potreroId, string nombreRes)
     {
-        try
+        var vacunas = _repoVacuna.ObtenerTodas();
+        var vacuna = vacunas.FirstOrDefault(v => v.Lote.Equals(loteVacuna, StringComparison.OrdinalIgnoreCase))
+            ?? throw new InvalidOperationException($"Vacuna con lote '{loteVacuna}' no encontrada");
+
+        var potreros = _repoPotrero.ObtenerTodos();
+        var potrero = potreros.FirstOrDefault(p => p.Identificacion.Valor.Equals(potreroId, StringComparison.OrdinalIgnoreCase))
+            ?? throw new InvalidOperationException($"Potrero '{potreroId}' no encontrado");
+        var res = potrero.BuscarRes(nombreRes)
+            ?? throw new InvalidOperationException($"Res '{nombreRes}' no encontrada");
+
+        // La regla de límites por subtipo vive en el dominio (Res.AplicarVacuna), no se re-implementa aquí.
+        res.AplicarVacuna(vacuna);
+        vacunas.Remove(vacuna);
+
+        _repoVacuna.GuardarTodas(vacunas);
+        _repoPotrero.GuardarTodos(potreros);
+        _repoVacuna.GuardarAplicadas(potreros);
+
+        int bacFinal = res.VacunasAplicadas.Count(v => v.Categoria == VacunaCategoria.Bacteriana);
+        int vivFinal = res.VacunasAplicadas.Count(v => v.Categoria == VacunaCategoria.Viva);
+
+        string mensajeEsquema = "";
+        if (res.EsquemaVacunacionCompleto())
         {
-            var vacunas = _repoVacuna.ObtenerTodas();
-            var vacuna = vacunas.FirstOrDefault(v => v.Lote.Equals(loteVacuna, StringComparison.OrdinalIgnoreCase))
-                ?? throw new InvalidOperationException($"Vacuna con lote '{loteVacuna}' no encontrada");
-
-            var potreros = _repoPotrero.ObtenerTodos();
-            var res = ObtenerResEnPotrero(potreros, potreroId, nombreRes);
-
-            res.AplicarVacuna(vacuna);
-            vacunas.Remove(vacuna);
-
-            _repoVacuna.GuardarTodas(vacunas);
-            _repoPotrero.GuardarTodos(potreros);
-            _repoVacuna.GuardarAplicadas(potreros);
-
-            var bacFinal = res.VacunasAplicadas.Count(v => v.Categoria == VacunaCategoria.Bacteriana);
-            var vivFinal = res.VacunasAplicadas.Count(v => v.Categoria == VacunaCategoria.Viva);
-            var mensajeEsquema = CrearMensajeEsquemaVacunacion(res, bacFinal, vivFinal);
-
-            return ResultadoOperacion.Ok($"Vacuna '{vacuna.Nombre}' aplicada a '{nombreRes}' correctamente. Datos válidos. Guardado exitoso en BD.{mensajeEsquema}");
+            _eventPublisher.Publicar(new VacunacionCompletadaEvent(res.Nombre, _reloj.GetUtcNow().DateTime));
+            mensajeEsquema = $" Esquema de vacunación COMPLETADO para '{res.Nombre}'.";
         }
-        catch (Exception ex) when (ex is InvalidOperationException or ArgumentException)
+        else
         {
-            return ResultadoOperacion.Fallo(ex.Message);
+            mensajeEsquema = $" La res '{res.Nombre}' aún no ha completado su esquema de vacunación. Bacterianas: {bacFinal}, Vivas: {vivFinal}.";
         }
+
+        return ResultadoOperacion.Ok(
+            $"Vacuna '{vacuna.Nombre}' aplicada a '{nombreRes}' correctamente. Datos válidos. Guardado exitoso en BD.{mensajeEsquema}");
     }
 
     public List<Vacuna> ListarVacunasDisponibles()
@@ -183,37 +140,5 @@ public class ServicioVacunacion : IServicioVacunacion
             ["PorVencer"] = vacunas.Count(v => v.CalcularEstado(_reloj) == EstadoVacuna.PorVencer),
             ["Vigentes"] = vacunas.Count(v => v.CalcularEstado(_reloj) == EstadoVacuna.Vigente)
         };
-    }
-
-    private static void ValidarLoteNoDuplicado(IEnumerable<Vacuna> vacunas, string lote)
-    {
-        if (vacunas.Any(v => v.Lote.Equals(lote, StringComparison.OrdinalIgnoreCase)))
-            throw new InvalidOperationException($"Ya existe una vacuna con lote '{lote}'");
-    }
-
-    private static void ValidarCantidadLote(uint cantidad)
-    {
-        if (cantidad == 0 || cantidad > 100)
-            throw new ArgumentException("La cantidad debe estar entre 1 y 100");
-    }
-
-    private Res ObtenerResEnPotrero(List<Potrero> potreros, string potreroId, string nombreRes)
-    {
-        var potrero = potreros.FirstOrDefault(p => p.Identificacion.Valor.Equals(potreroId, StringComparison.OrdinalIgnoreCase))
-            ?? throw new InvalidOperationException($"Potrero '{potreroId}' no encontrado");
-
-        return potrero.BuscarRes(nombreRes)
-            ?? throw new InvalidOperationException($"Res '{nombreRes}' no encontrada");
-    }
-
-    private string CrearMensajeEsquemaVacunacion(Res res, int bacFinal, int vivFinal)
-    {
-        if (res.EsquemaVacunacionCompleto())
-        {
-            _eventPublisher.Publicar(new VacunacionCompletadaEvent(res.Nombre, _reloj.GetUtcNow().DateTime));
-            return $" Esquema de vacunación COMPLETADO para '{res.Nombre}'.";
-        }
-
-        return $" La res '{res.Nombre}' aún no ha completado su esquema de vacunación. Bacterianas: {bacFinal}, Vivas: {vivFinal}.";
     }
 }

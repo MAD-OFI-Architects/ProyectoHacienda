@@ -81,3 +81,18 @@ public record VacunaVencidaEvent : IDomainEvent
         OcurridoEn = ocurridoEn;
     }
 }
+public record VentaRealizadaEvent : IDomainEvent
+{
+    public string NombreRes { get; }
+    public IReadOnlyList<string> Productos { get; }
+    public decimal Total { get; }
+    public DateTime OcurridoEn { get; }
+
+    public VentaRealizadaEvent(string nombreRes, IReadOnlyList<string> productos, decimal total, DateTime ocurridoEn)
+    {
+        NombreRes = nombreRes;
+        Productos = productos;
+        Total = total;
+        OcurridoEn = ocurridoEn;
+    }
+}

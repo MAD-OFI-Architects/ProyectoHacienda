@@ -1,6 +1,6 @@
 using Hacienda.Application.Interfaces;
 using Hacienda.Application.Services;
-using Hacienda.Application.Validaciones;
+using Hacienda.Domain.Builders;
 using Hacienda.Domain.Factories;
 using Hacienda.Domain.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -28,7 +28,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddHttpContextAccessor();
 
 // ── Domain Events ──
-builder.Services.AddScoped<IDomainEventPublisher, DomainEventPublisherConsola>();
+builder.Services.AddScoped<IDomainEventPublisher, DespachadorDeEventos>();
 
 // ── Cross-cutting (Singleton) ──
 builder.Services.AddSingleton(TimeProvider.System);
@@ -36,9 +36,6 @@ builder.Services.AddSingleton<IGuidProvider, GuidProviderSistema>();
 builder.Services.AddSingleton<IHasher, HasherBcrypt>();
 
 // ── Factories (Transient) ──
-builder.Services.AddTransient<IResFactory, FabricaRes>();
-builder.Services.AddTransient<IVacunaFactory, FabricaVacuna>();
-builder.Services.AddTransient<IVentaFactory, FabricaVenta>();
 builder.Services.AddTransient<IPotreroFactory, FabricaPotrero>();
 
 // ── Application Services (Scoped) ──
@@ -53,12 +50,6 @@ builder.Services.AddScoped<IInstaladorChip, InstaladorChip>();
 builder.Services.AddScoped<IServicioChip, ServicioChip>();
 builder.Services.AddScoped<IServicioGeolocalizacion, ServicioGeolocalizacion>();
 
-// ── Validation (Transient) ──
-builder.Services.AddTransient<IValidarPotrero, ValidadorPotrero>();
-builder.Services.AddTransient<IValidarRes, ValidadorRes>();
-builder.Services.AddTransient<IValidarVacuna, ValidadorVacuna>();
-builder.Services.AddTransient<IValidarVenta, ValidadorVenta>();
-
 // ── Repositories (SQLite) ──
 var directorioDatos = Path.Combine(builder.Environment.ContentRootPath, "Datos");
 Directory.CreateDirectory(directorioDatos);
@@ -67,13 +58,13 @@ var connectionString = $"Data Source={Path.Combine(directorioDatos, "hacienda.db
 DatabaseInitializer.Initialize(connectionString);
 
 builder.Services.AddScoped<IRepositorioPotrero>(sp =>
-    new RepositorioPotreroSqlite(connectionString, sp.GetRequiredService<IGuidProvider>()));
+    new RepositorioPotreroSqlite(connectionString, sp.GetRequiredService<IGuidProvider>(), sp.GetRequiredService<IRegistroDeReses>()));
 builder.Services.AddScoped<IRepositorioRes>(sp =>
-    new RepositorioResSqlite(connectionString, sp.GetRequiredService<IGuidProvider>()));
+    new RepositorioResSqlite(connectionString, sp.GetRequiredService<IGuidProvider>(), sp.GetRequiredService<IRegistroDeReses>()));
 builder.Services.AddScoped<IRepositorioVacuna>(sp =>
     new RepositorioVacunaSqlite(connectionString, sp.GetRequiredService<IGuidProvider>()));
 builder.Services.AddScoped<IRepositorioVenta>(sp =>
-    new RepositorioVentaSqlite(connectionString, sp.GetRequiredService<IGuidProvider>()));
+    new RepositorioVentaSqlite(connectionString, sp.GetRequiredService<IGuidProvider>(), sp.GetRequiredService<IRegistroDeReses>()));
 builder.Services.AddScoped<IRepositorioUsuario>(sp =>
     new RepositorioUsuarioSqlite(connectionString, sp.GetRequiredService<IGuidProvider>()));
 builder.Services.AddScoped<IRepositorioChip>(sp =>
@@ -94,6 +85,33 @@ builder.Services.AddScoped<IDataSeeder>(sp =>
         sp.GetRequiredService<IGuidProvider>(),
         sp.GetRequiredService<IHasher>(),
         connectionString));
+
+// ── Reto 2 · TO-BE: creators concretos (Factory Method) ──
+builder.Services.AddTransient<FabricaDeRes, FabricaTernero>();
+builder.Services.AddTransient<FabricaDeRes, FabricaCebon>();
+builder.Services.AddTransient<FabricaDeRes, FabricaNovillo>();
+builder.Services.AddTransient<FabricaDeRes, FabricaVacaLechera>();
+builder.Services.AddTransient<FabricaDeVacuna, FabricaBacteriana>();
+builder.Services.AddTransient<FabricaDeVacuna, FabricaViva>();
+builder.Services.AddTransient<FabricaDeProducto, FabricaLacteo>();
+builder.Services.AddTransient<FabricaDeProducto, FabricaCarne>();
+builder.Services.AddTransient<FabricaDeProducto, FabricaPiel>();
+
+// ── Reto 2 · TO-BE: registros (punto único de decisión) ──
+builder.Services.AddScoped<IRegistroDeReses, RegistroDeReses>();
+builder.Services.AddScoped<IRegistroDeVacunas, RegistroDeVacunas>();
+builder.Services.AddScoped<IRegistroDeProductos, RegistroDeProductos>();
+
+// ── Reto 2 · TO-BE: builder de ventas (SC-1) ──
+builder.Services.AddScoped<VentaBuilder>();
+
+// ── Reto 2 · TO-BE: repositorio de productos (SC-1) ──
+builder.Services.AddScoped<IRepositorioProducto>(sp =>
+    new RepositorioProductoSqlite(connectionString, sp.GetRequiredService<IRegistroDeProductos>()));
+
+// ── Reto 2 · TO-BE: handlers Observer — el ORDEN es el contrato (consola primero, stock después) ──
+builder.Services.AddTransient<IManejadorDeEventos, HandlerConsola>();
+builder.Services.AddScoped<IManejadorDeEventos, HandlerStockDerivados>();
 
 var app = builder.Build();
 

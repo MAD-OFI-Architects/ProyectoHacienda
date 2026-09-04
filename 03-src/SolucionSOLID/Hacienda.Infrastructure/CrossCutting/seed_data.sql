@@ -265,3 +265,10 @@ INSERT INTO ventas (id, fecha, res_nombre, res_peso, res_edad, res_tipo, potrero
 -- ── Vacunas Aplicadas ──
 INSERT INTO vacunas_aplicadas (res_id, vacuna_id) VALUES ('00000000-0000-0000-0000-000020000000', '00000000-0000-0000-0000-000300000018');
 INSERT INTO vacunas_aplicadas (res_id, vacuna_id) VALUES ('00000000-0000-0000-0000-000020000000', '00000000-0000-0000-0000-000300000019');
+
+-- ── SC-1: derivados del ganado (lácteos, carne, piel) + vaca lechera de producción propia ──
+INSERT INTO reses (id, potrero_id, nombre, peso, edad, tipo, chip_id) VALUES ('00000000-0000-0000-0000-000020000900', '00000000-0000-0000-0000-000010000003', 'Manchita', 520, 60, 'VacaLechera', NULL);
+INSERT INTO productos (id, nombre, tipo, precio, stock, stock_minimo) VALUES ('00000000-0000-0000-0000-000030000001', 'Leche Cruda', 1, 3500.00, 500, 100);
+INSERT INTO productos (id, nombre, tipo, precio, stock, stock_minimo) VALUES ('00000000-0000-0000-0000-000030000002', 'Queso Campesino', 1, 18000.00, 40, 10);
+INSERT INTO productos (id, nombre, tipo, precio, stock, stock_minimo) VALUES ('00000000-0000-0000-0000-000030000003', 'Corte Lomo Fino', 2, 45000.00, 25, 5);
+INSERT INTO productos (id, nombre, tipo, precio, stock, stock_minimo) VALUES ('00000000-0000-0000-0000-000030000004', 'Cuero Curado', 3, 120000.00, 8, 3);

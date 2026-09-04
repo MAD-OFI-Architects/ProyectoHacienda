@@ -10,11 +10,13 @@ public class RepositorioVentaSqlite : IRepositorioVenta
 {
     private readonly string _connectionString;
     private readonly IGuidProvider _guidProvider;
+    private readonly IRegistroDeReses _registroReses;
 
-    public RepositorioVentaSqlite(string connectionString, IGuidProvider guidProvider)
+    public RepositorioVentaSqlite(string connectionString, IGuidProvider guidProvider, IRegistroDeReses registroReses)
     {
         _connectionString = connectionString;
         _guidProvider = guidProvider;
+        _registroReses = registroReses;
     }
 
     public List<Venta> ObtenerTodas()
@@ -23,6 +25,7 @@ public class RepositorioVentaSqlite : IRepositorioVenta
         conn.Open();
 
         var rows = conn.Query<dynamic>("SELECT * FROM ventas");
+        var itemRows = conn.Query<dynamic>("SELECT * FROM venta_items").ToLookup(r => (string)r.venta_id);
         var ventas = new List<Venta>();
 
         foreach (var row in rows)
@@ -36,9 +39,16 @@ public class RepositorioVentaSqlite : IRepositorioVenta
             var potreroOrigen = (string)row.potrero_origen;
             var monto = (decimal)row.monto;
 
-            Res res = CatalogoRes.CrearDesdeNombre(_guidProvider.Nuevo(), resNombre, resPeso, resEdad, resTipo);
+            Res res = _registroReses.RehidratarDesdeTexto(_guidProvider.Nuevo(), resNombre, resPeso, resEdad, resTipo);
 
-            ventas.Add(new Venta(id, fecha, res, potreroOrigen, new Dinero(monto)));
+            var items = itemRows[id.ToString()]
+                .Select(r => new VentaItem(
+                    new ItemVendibleRegistro((string)r.descripcion),
+                    (int)(long)r.cantidad,
+                    (decimal)r.monto))
+                .ToList();
+
+            ventas.Add(new Venta(id, fecha, res, potreroOrigen, new Dinero(monto), items));
         }
 
         return ventas;
@@ -51,6 +61,7 @@ public class RepositorioVentaSqlite : IRepositorioVenta
         using var tx = conn.BeginTransaction();
 
         conn.Execute("DELETE FROM ventas", transaction: tx);
+        conn.Execute("DELETE FROM venta_items", transaction: tx);
 
         foreach (var venta in ventas)
         {
@@ -69,6 +80,20 @@ public class RepositorioVentaSqlite : IRepositorioVenta
                     Monto = venta.Monto.Monto
                 },
                 transaction: tx);
+
+            foreach (var item in venta.Items)
+                conn.Execute(
+                    @"INSERT INTO venta_items (id, venta_id, descripcion, cantidad, monto)
+                      VALUES (@Id, @VentaId, @Descripcion, @Cantidad, @Monto)",
+                    new
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        VentaId = venta.Id.ToString(),
+                        Descripcion = item.Vendible.Descripcion,
+                        item.Cantidad,
+                        item.Monto
+                    },
+                    transaction: tx);
         }
 
         tx.Commit();

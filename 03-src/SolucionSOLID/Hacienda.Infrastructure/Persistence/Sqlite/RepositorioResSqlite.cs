@@ -9,11 +9,13 @@ public class RepositorioResSqlite : IRepositorioRes
 {
     private readonly string _connectionString;
     private readonly IGuidProvider _guidProvider;
+    private readonly IRegistroDeReses _registroReses;
 
-    public RepositorioResSqlite(string connectionString, IGuidProvider guidProvider)
+    public RepositorioResSqlite(string connectionString, IGuidProvider guidProvider, IRegistroDeReses registroReses)
     {
         _connectionString = connectionString;
         _guidProvider = guidProvider;
+        _registroReses = registroReses;
     }
 
     public List<Res> ObtenerTodas()
@@ -26,7 +28,8 @@ public class RepositorioResSqlite : IRepositorioRes
 
         foreach (var row in rows)
         {
-            var res = RepositorioPotreroSqlite.MapearRes(row);
+            var res = _registroReses.RehidratarDesdeTexto(
+                Guid.Parse((string)row.id), (string)row.nombre, (uint)(long)row.peso, (ushort)(long)row.edad, (string)row.tipo);
             RepositorioPotreroSqlite.CargarChipSiExiste(res, row, conn);
             reses.Add(res);
         }
@@ -93,7 +96,8 @@ public class RepositorioResSqlite : IRepositorioRes
 
             if (potrero != null)
             {
-                var res = RepositorioPotreroSqlite.MapearRes(row);
+                var res = _registroReses.RehidratarDesdeTexto(
+                Guid.Parse((string)row.id), (string)row.nombre, (uint)(long)row.peso, (ushort)(long)row.edad, (string)row.tipo);
                 RepositorioPotreroSqlite.CargarChipSiExiste(res, row, conn);
                 potrero.AgregarRes(res);
             }

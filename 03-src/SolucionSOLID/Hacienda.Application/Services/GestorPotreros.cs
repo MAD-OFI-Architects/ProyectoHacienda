@@ -11,18 +11,15 @@ namespace Hacienda.Application.Services;
 public class GestorPotreros : IGestorPotreros
 {
     private readonly IRepositorioPotrero _repoPotrero;
-    private readonly IValidarPotrero _validador;
     private readonly IDomainEventPublisher _eventPublisher;
     private readonly IPotreroFactory _fabricaPotrero;
 
     public GestorPotreros(
         IRepositorioPotrero repoPotrero,
-        IValidarPotrero validador,
         IDomainEventPublisher eventPublisher,
         IPotreroFactory fabricaPotrero)
     {
         _repoPotrero = repoPotrero;
-        _validador = validador;
         _eventPublisher = eventPublisher;
         _fabricaPotrero = fabricaPotrero;
     }
@@ -33,10 +30,6 @@ public class GestorPotreros : IGestorPotreros
             return ResultadoOperacion.Fallo($"Ya existe un potrero '{identificacion}'");
 
         var potrero = _fabricaPotrero.Crear(identificacion, tipo);
-
-        var validacion = _validador.Validar(potrero);
-        if (!validacion.EsValido)
-            return ResultadoOperacion.Fallo(validacion.Errores);
 
         var potreros = _repoPotrero.ObtenerTodos();
         potreros.Add(potrero);

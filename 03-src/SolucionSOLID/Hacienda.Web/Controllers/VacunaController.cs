@@ -1,3 +1,4 @@
+using Hacienda.Domain.Factories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hacienda.Application.Interfaces;
@@ -46,13 +47,10 @@ public class VacunaController : Controller
     {
         try
         {
-            var resultado = tipoVacuna == "Bacteriana"
-                ? (periodoAplicacion.HasValue
-                    ? _servicioVacunacion.CrearVacunaBacteriana(nombre, lote, fechaVencimiento, fechaAplicacion, periodoAplicacion.Value)
-                    : ResultadoOperacion.Fallo("El período de aplicación es requerido"))
-                : (atenuacion.HasValue
-                    ? _servicioVacunacion.CrearVacunaViva(nombre, lote, fechaVencimiento, fechaAplicacion, atenuacion.Value)
-                    : ResultadoOperacion.Fallo("La atenuación es requerida"));
+            // P-02: una sola puerta — la categoría del DatosVacuna decide la fábrica (sin ternario por string).
+            var categoria = tipoVacuna == "Bacteriana" ? VacunaCategoria.Bacteriana : VacunaCategoria.Viva;
+            var datos = new DatosVacuna(categoria, nombre, lote, fechaVencimiento, fechaAplicacion, periodoAplicacion, atenuacion);
+            var resultado = _servicioVacunacion.CrearVacuna(datos);
 
             if (!resultado.Exito)
             {

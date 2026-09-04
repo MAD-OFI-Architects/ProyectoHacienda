@@ -30,9 +30,9 @@ public readonly record struct RangoEdad
     public override string ToString()
         => (Minimo.HasValue, Maximo.HasValue) switch
         {
-            (true, true) => $"[{Minimo}..{Maximo}]",
-            (true, false) => $"[{Minimo}..∞)",
-            (false, true) => $"[0..{Maximo}]",
-            _ => "[0..∞)"
+            (true, true) => $"{Minimo}-{Maximo} meses",
+            (true, false) => $"{Minimo}+ meses",
+            (false, true) => $"0-{Maximo} meses",
+            _ => "cualquier edad"
         };
 }

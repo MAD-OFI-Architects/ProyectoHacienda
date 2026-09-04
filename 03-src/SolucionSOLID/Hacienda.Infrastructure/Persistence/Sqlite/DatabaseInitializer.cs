@@ -107,6 +107,28 @@ public static class DatabaseInitializer
                 FOREIGN KEY (chip_id) REFERENCES chips(id)
             );
             """);
+
+        ExecuteNonQuery(conn, """
+            CREATE TABLE IF NOT EXISTS productos (
+                id TEXT PRIMARY KEY,
+                nombre TEXT NOT NULL,
+                tipo INTEGER NOT NULL,
+                precio REAL NOT NULL,
+                stock INTEGER NOT NULL,
+                stock_minimo INTEGER NOT NULL
+            );
+            """);
+
+        ExecuteNonQuery(conn, """
+            CREATE TABLE IF NOT EXISTS venta_items (
+                id TEXT PRIMARY KEY,
+                venta_id TEXT NOT NULL,
+                descripcion TEXT NOT NULL,
+                cantidad INTEGER NOT NULL,
+                monto REAL NOT NULL,
+                FOREIGN KEY (venta_id) REFERENCES ventas(id)
+            );
+            """);
     }
 
     private static void ExecuteNonQuery(SqliteConnection conn, string sql)

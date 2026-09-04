@@ -20,7 +20,8 @@ public static class CatalogoRes
         {
             [TipoRes.Ternero] = Desde(TipoRes.Ternero, "Ternero", ParametrosRes.Ternero),
             [TipoRes.Cebon] = Desde(TipoRes.Cebon, "Cebon", ParametrosRes.Cebon),
-            [TipoRes.Novillo] = Desde(TipoRes.Novillo, "Novillo", ParametrosRes.Novillo)
+            [TipoRes.Novillo] = Desde(TipoRes.Novillo, "Novillo", ParametrosRes.Novillo),
+            [TipoRes.VacaLechera] = Desde(TipoRes.VacaLechera, "VacaLechera", ParametrosRes.VacaLechera)
         };
 
     private static ConfiguracionResTipo Desde(TipoRes tipo, string nombre, ParametrosSubtipo parametros)

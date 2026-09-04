@@ -3,9 +3,8 @@ using Hacienda.Application.Results;
 using Hacienda.Domain.Entities;
 using Hacienda.Domain.Enums;
 using Hacienda.Domain.Events;
-using Hacienda.Domain.Factories;
 using Hacienda.Domain.Interfaces;
-using Hacienda.Domain.ValueObjects;
+using Hacienda.Domain.Reglas;
 
 namespace Hacienda.Application.Services;
 
@@ -13,23 +12,20 @@ public class GestorReses : IGestorReses
 {
     private readonly IRepositorioPotrero _repoPotrero;
     private readonly IRepositorioVacuna _repoVacuna;
-    private readonly IResFactory _fabricaRes;
-    private readonly IValidarRes _validador;
+    private readonly IRegistroDeReses _registroReses;
     private readonly IDomainEventPublisher _eventPublisher;
     private readonly TimeProvider _reloj;
 
     public GestorReses(
         IRepositorioPotrero repoPotrero,
         IRepositorioVacuna repoVacuna,
-        IResFactory fabricaRes,
-        IValidarRes validador,
+        IRegistroDeReses registroReses,
         IDomainEventPublisher eventPublisher,
         TimeProvider reloj)
     {
         _repoPotrero = repoPotrero;
         _repoVacuna = repoVacuna;
-        _fabricaRes = fabricaRes;
-        _validador = validador;
+        _registroReses = registroReses;
         _eventPublisher = eventPublisher;
         _reloj = reloj;
     }
@@ -41,26 +37,16 @@ public class GestorReses : IGestorReses
         if (potrero is null)
             return ResultadoOperacion.Fallo($"Potrero '{potreroId}' no encontrado");
 
-        TipoRes tipo = MapearTipoRes(potrero.Tipo);
-        Res res = _fabricaRes.Crear(tipo, nombre, peso, edad);
+        TipoRes tipo = _registroReses.MapearDesdePotrero(potrero.Tipo);
+        Res res = _registroReses.Crear(tipo, nombre, peso, edad);
 
-        var validacion = _validador.Validar(res);
-        if (!validacion.EsValido)
-            return ResultadoOperacion.Fallo(validacion.Errores);
+        var errores = res.ValidarIntegridad();
+        if (errores.Count > 0)
+            return ResultadoOperacion.Fallo(errores);
 
         potrero.AgregarRes(res);
 
-        string mensajeEventos = "";
-        if (res.Peso < res.PesoMinimo)
-        {
-            _eventPublisher.Publicar(new PesoMinimoEvent(res.Nombre, res.Peso, _reloj.GetUtcNow().DateTime));
-            mensajeEventos += $"\n[Evento] La res '{res.Nombre}' está en desnutrición ({res.Peso} kg).";
-        }
-        if (res.Peso >= res.PesoRecomendadoVenta)
-        {
-            _eventPublisher.Publicar(new PesoVentaEvent(res.Nombre, res.Peso, _reloj.GetUtcNow().DateTime));
-            mensajeEventos += $"\n[Evento] La res '{res.Nombre}' está apta para venta ({res.Peso} kg).";
-        }
+        string mensajeEventos = EvaluarYPublicarPeso(res);
         if (potrero.EstaALaMitad)
         {
             _eventPublisher.Publicar(new PotreroMitadEvent(potreroId, _reloj.GetUtcNow().DateTime));
@@ -83,31 +69,38 @@ public class GestorReses : IGestorReses
     public ResultadoOperacion AlimentarRes(string potreroId, string nombreRes, uint cantidad)
     {
         var potreros = _repoPotrero.ObtenerTodos();
-        var potrero = potreros.FirstOrDefault(p => p.Identificacion.Valor.Equals(potreroId, StringComparison.OrdinalIgnoreCase));
-        if (potrero is null)
-            return ResultadoOperacion.Fallo($"Potrero '{potreroId}' no encontrado");
-
-        var res = potrero.BuscarRes(nombreRes);
-        if (res is null)
-            return ResultadoOperacion.Fallo($"Res '{nombreRes}' no encontrada");
+        var potrero = potreros.FirstOrDefault(p => p.Identificacion.Valor.Equals(potreroId, StringComparison.OrdinalIgnoreCase))
+            ?? throw new InvalidOperationException($"Potrero '{potreroId}' no encontrado");
+        var res = potrero.BuscarRes(nombreRes)
+            ?? throw new InvalidOperationException($"Res '{nombreRes}' no encontrada");
 
         res.Alimentar(cantidad);
 
-        string mensajeEventos = "";
-        if (res.Peso < res.PesoMinimo)
-        {
-            _eventPublisher.Publicar(new PesoMinimoEvent(res.Nombre, res.Peso, _reloj.GetUtcNow().DateTime));
-            mensajeEventos += $"\n[Evento] La res '{res.Nombre}' sigue en desnutrición ({res.Peso} kg).";
-        }
-        if (res.Peso >= res.PesoRecomendadoVenta)
-        {
-            _eventPublisher.Publicar(new PesoVentaEvent(res.Nombre, res.Peso, _reloj.GetUtcNow().DateTime));
-            mensajeEventos += $"\n[Evento] La res '{res.Nombre}' está apta para venta ({res.Peso} kg).";
-        }
+        string mensajeEventos = EvaluarYPublicarPeso(res);
 
         _repoPotrero.GuardarTodos(potreros);
 
         return ResultadoOperacion.Ok($"La res '{res.Nombre}' fue alimentada, ahora pesa {res.Peso} kg.{mensajeEventos}");
+    }
+
+    /// <summary>
+    /// P-14: la reacción de peso vive UNA vez (antes duplicada entre AgregarRes y AlimentarRes).
+    /// El flujo publica; los handlers del despachador reaccionan (consola con la misma línea de siempre).
+    /// </summary>
+    private string EvaluarYPublicarPeso(Res res)
+    {
+        string mensaje = "";
+        if (res.Peso < res.PesoMinimo)
+        {
+            _eventPublisher.Publicar(new PesoMinimoEvent(res.Nombre, res.Peso, _reloj.GetUtcNow().DateTime));
+            mensaje += $"\n[Evento] La res '{res.Nombre}' está en desnutrición ({res.Peso} kg).";
+        }
+        if (res.Peso >= res.PesoRecomendadoVenta)
+        {
+            _eventPublisher.Publicar(new PesoVentaEvent(res.Nombre, res.Peso, _reloj.GetUtcNow().DateTime));
+            mensaje += $"\n[Evento] La res '{res.Nombre}' está apta para venta ({res.Peso} kg).";
+        }
+        return mensaje;
     }
 
     public List<(Potrero Potrero, Res Res)> ListarReses()
@@ -119,21 +112,24 @@ public class GestorReses : IGestorReses
         foreach (var potrero in potreros)
             foreach (var res in potrero.Reses)
                 resultado.Add((potrero, res));
+
         return resultado;
     }
 
     public Dictionary<string, object> ObtenerEstadisticas()
     {
+        _repoVacuna.CargarVacunasAplicadasEnPotreros(_repoPotrero.ObtenerTodos());
         var todas = ListarReses();
-        return new Dictionary<string, object>
+        var stats = new Dictionary<string, object>
         {
             ["TotalReses"] = todas.Count,
-            ["Terneros"] = todas.Count(r => r.Res.Tipo == TipoRes.Ternero),
-            ["Cebones"] = todas.Count(r => r.Res.Tipo == TipoRes.Cebon),
-            ["Novillos"] = todas.Count(r => r.Res.Tipo == TipoRes.Novillo),
             ["PesoPromedio"] = todas.Any() ? todas.Average(r => r.Res.Peso) : 0
         };
-    }
 
-    private static TipoRes MapearTipoRes(TipoPotrero tipoPotrero) => CatalogoRes.MapearDesdePotrero(tipoPotrero);
+        // P-01: contadores polimórficos — el plural es dato del catálogo, sin cases por tipo.
+        foreach (var tipo in Enum.GetValues<TipoRes>())
+            stats[ParametrosRes.PluralPorTipo[tipo]] = todas.Count(r => r.Res.Tipo == tipo);
+
+        return stats;
+    }
 }

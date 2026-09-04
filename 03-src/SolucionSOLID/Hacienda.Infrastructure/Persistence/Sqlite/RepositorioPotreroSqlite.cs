@@ -11,11 +11,13 @@ public class RepositorioPotreroSqlite : IRepositorioPotrero
 {
     private readonly string _connectionString;
     private readonly IGuidProvider _guidProvider;
+    private readonly IRegistroDeReses _registroReses;
 
-    public RepositorioPotreroSqlite(string connectionString, IGuidProvider guidProvider)
+    public RepositorioPotreroSqlite(string connectionString, IGuidProvider guidProvider, IRegistroDeReses registroReses)
     {
         _connectionString = connectionString;
         _guidProvider = guidProvider;
+        _registroReses = registroReses;
     }
 
     public List<Potrero> ObtenerTodos()
@@ -139,7 +141,7 @@ public class RepositorioPotreroSqlite : IRepositorioPotrero
         tx.Commit();
     }
 
-    internal static Res MapearRes(dynamic row)
+    internal Res MapearRes(dynamic row)
     {
         var id = Guid.Parse((string)row.id);
         var nombre = (string)row.nombre;
@@ -147,7 +149,7 @@ public class RepositorioPotreroSqlite : IRepositorioPotrero
         var edad = (ushort)(long)row.edad;
         var tipo = (string)row.tipo;
 
-        return CatalogoRes.CrearDesdeNombre(id, nombre, peso, edad, tipo);
+        return _registroReses.RehidratarDesdeTexto(id, nombre, peso, edad, tipo);
     }
 
     internal static void CargarChipSiExiste(Res res, dynamic row, SqliteConnection conn)
