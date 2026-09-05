@@ -38,9 +38,6 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<IGuidProvider, GuidProviderSistema>();
 builder.Services.AddSingleton<IHasher, HasherBcrypt>();
 
-// ── Factories (Transient) ──
-builder.Services.AddTransient<IPotreroFactory, FabricaPotrero>();
-
 // ── Application Services (Scoped) ──
 builder.Services.AddScoped<IGestorPotreros, GestorPotreros>();
 builder.Services.AddScoped<IGestorReses, GestorReses>();

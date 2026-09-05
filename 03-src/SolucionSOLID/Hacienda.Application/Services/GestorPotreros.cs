@@ -2,12 +2,12 @@ using Hacienda.Application.Interfaces;
 using Hacienda.Application.Results;
 using Hacienda.Domain.Entities;
 using Hacienda.Domain.Enums;
-using Hacienda.Domain.Factories;
 using Hacienda.Domain.Factories.Reses;
 using Hacienda.Domain.Factories.Vacunas;
 using Hacienda.Domain.Factories.Productos;
 using Hacienda.Domain.Interfaces;
 using Hacienda.Domain.Results;
+using Hacienda.Domain.ValueObjects;
 
 namespace Hacienda.Application.Services;
 
@@ -15,16 +15,16 @@ public class GestorPotreros : IGestorPotreros
 {
     private readonly IRepositorioPotrero _repoPotrero;
     private readonly IDomainEventPublisher _eventPublisher;
-    private readonly IPotreroFactory _fabricaPotrero;
+    private readonly IGuidProvider _guidProvider;
 
     public GestorPotreros(
         IRepositorioPotrero repoPotrero,
         IDomainEventPublisher eventPublisher,
-        IPotreroFactory fabricaPotrero)
+        IGuidProvider guidProvider)
     {
         _repoPotrero = repoPotrero;
         _eventPublisher = eventPublisher;
-        _fabricaPotrero = fabricaPotrero;
+        _guidProvider = guidProvider;
     }
 
     public ResultadoOperacion CrearPotrero(string identificacion, TipoPotrero tipo)
@@ -32,7 +32,10 @@ public class GestorPotreros : IGestorPotreros
         if (_repoPotrero.ObtenerPorIdentificacion(identificacion) != null)
             return ResultadoOperacion.Fallo($"Ya existe un potrero '{identificacion}'");
 
-        var potrero = _fabricaPotrero.Crear(identificacion, tipo);
+        var potrero = new Potrero(
+            _guidProvider.Nuevo(),
+            new Identificacion(identificacion),
+            tipo);
 
         var potreros = _repoPotrero.ObtenerTodos();
         potreros.Add(potrero);
