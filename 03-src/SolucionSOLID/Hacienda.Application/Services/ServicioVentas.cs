@@ -115,6 +115,9 @@ public class ServicioVentas : IServicioVentas
     public List<Venta> ListarVentas()
         => _repoVenta.ObtenerTodas().OrderByDescending(v => v.Fecha).ToList();
 
+    public List<ProductoDerivado> ListarProductosDerivados()
+        => _repoProducto.ObtenerTodos().OrderBy(p => p.Nombre).ToList();
+
     public Dictionary<string, object> ObtenerEstadisticas()
     {
         var ventas = _repoVenta.ObtenerTodas();

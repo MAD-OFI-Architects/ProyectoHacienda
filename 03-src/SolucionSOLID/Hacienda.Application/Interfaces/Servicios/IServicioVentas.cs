@@ -9,5 +9,6 @@ public interface IServicioVentas
     ResultadoOperacion VenderConDerivados(string potreroId, string nombreRes, decimal monto,
         IReadOnlyDictionary<string, int> productos);
     List<Venta> ListarVentas();
+    List<ProductoDerivado> ListarProductosDerivados();
     Dictionary<string, object> ObtenerEstadisticas();
 }

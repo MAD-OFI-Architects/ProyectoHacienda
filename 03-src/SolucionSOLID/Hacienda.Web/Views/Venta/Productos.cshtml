@@ -1,0 +1,112 @@
+@using Hacienda.Domain.Entities
+@using Hacienda.Domain.Enums
+@model List<ProductoDerivado>
+
+@{
+    ViewData["Title"] = "🧀 Productos Derivados";
+
+    string BadgeTipo(TipoProducto tipo) => tipo switch
+    {
+        TipoProducto.Lacteo => "info",
+        TipoProducto.Carne => "danger",
+        TipoProducto.Piel => "dark",
+        _ => "secondary"
+    };
+
+    string IconoTipo(TipoProducto tipo) => tipo switch
+    {
+        TipoProducto.Lacteo => "water_drop",
+        TipoProducto.Carne => "lunch_dining",
+        TipoProducto.Piel => "checkroom",
+        _ => "inventory_2"
+    };
+}
+
+<div class="container mt-4">
+    <!-- Encabezado -->
+    <div class="aw-page-header mb-4 text-center">
+        <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+            🧀 Productos Derivados
+        </h1>
+        <p class="text-muted mb-0">Inventario de lácteos, carne y piel derivados de la hacienda</p>
+    </div>
+
+    <!-- Mensaje de éxito/error -->
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-@TempData["TipoMensaje"] alert-dismissible fade show" role="alert">
+            <strong>@TempData["Mensaje"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Acciones -->
+    <div class="text-center mb-4">
+        <a asp-action="VenderConDerivados" class="btn aw-btn aw-btn-primary btn-lg rounded-pill px-5">
+            <span class="material-icons-outlined" style="font-size: 1.2rem; vertical-align: sub;">shopping_cart</span>
+            Vender con Derivados
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="aw-card">
+            <div class="aw-card-header">Sin productos</div>
+            <div class="p-4 text-center text-muted">
+                <span class="material-icons-outlined" style="font-size: 2.5rem;">inventory_2</span>
+                <p class="mb-0 mt-2">Todavía no hay productos derivados registrados.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="aw-card">
+            <div class="aw-card-header">Inventario (@Model.Count productos)</div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Producto</th>
+                            <th scope="col">Tipo</th>
+                            <th scope="col" class="text-end">Precio</th>
+                            <th scope="col" class="text-center">Unidad</th>
+                            <th scope="col" class="text-center">Stock</th>
+                            <th scope="col" class="text-center">Mínimo</th>
+                            <th scope="col" class="text-center">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var producto in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold">
+                                    <span class="material-icons-outlined me-1" style="vertical-align: sub; color: var(--aw-green);">@IconoTipo(producto.Tipo)</span>
+                                    @producto.Nombre
+                                </td>
+                                <td><span class="badge rounded-pill text-bg-@BadgeTipo(producto.Tipo)">@producto.Tipo</span></td>
+                                <td class="text-end">$@string.Format("{0:N0}", producto.Precio.Monto)</td>
+                                <td class="text-center">@producto.Unidad</td>
+                                <td class="text-center fw-bold">@producto.Stock</td>
+                                <td class="text-center text-muted">@producto.StockMinimo</td>
+                                <td class="text-center">
+                                    @if (producto.EnStockMinimo)
+                                    {
+                                        <span class="badge rounded-pill text-bg-warning">⚠ Stock mínimo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill text-bg-success">Disponible</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <div class="text-center mt-4">
+        <a asp-controller="Venta" asp-action="Index" class="a-clean">← Volver a Ventas</a>
+    </div>
+</div>
