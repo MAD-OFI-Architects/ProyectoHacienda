@@ -96,8 +96,17 @@
     @foreach (var venta in Model)
     {
     var precioKg = venta.Res.Peso > 0 ? (double)venta.Monto.Monto / venta.Res.Peso : 0;
+    var tieneItems = venta.Items != null && venta.Items.Any();
     <tr>
     <td>
+    @if (tieneItems)
+    {
+    <button class="btn btn-sm p-0 me-1 border-0 bg-transparent" type="button"
+    data-bs-toggle="collapse" data-bs-target="#items-@venta.Id" aria-expanded="false"
+    title="Ver ítems de la venta">
+    <span class="material-icons-outlined" style="font-size: 1rem; color: var(--aw-green);">expand_more</span>
+    </button>
+    }
     <strong>@venta.Fecha.ToString("dd/MM/yyyy")</strong><br/>
     <small class="text-muted">@venta.Fecha.ToString("HH:mm")</small>
     </td>
@@ -120,6 +129,37 @@
     <small class="text-muted">$@string.Format("{0:N0}", precioKg)/kg</small>
     </td>
     </tr>
+    @if (tieneItems)
+    {
+    <tr class="collapse" id="items-@venta.Id">
+    <td></td>
+    <td colspan="6">
+    <div class="p-2 rounded" style="background: var(--aw-green-soft);">
+    <div class="table-responsive">
+    <table class="table table-sm mb-0 align-middle">
+    <thead>
+    <tr>
+    <th>Ítem de la venta</th>
+    <th class="text-center">Cantidad</th>
+    <th class="text-end">Monto</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in venta.Items)
+    {
+    <tr>
+    <td>@item.Vendible.Descripcion</td>
+    <td class="text-center">@item.Cantidad</td>
+    <td class="text-end">$@string.Format("{0:N0}", item.Monto)</td>
+    </tr>
+    }
+    </tbody>
+    </table>
+    </div>
+    </div>
+    </td>
+    </tr>
+    }
     }
     </tbody>
     <tfoot>
