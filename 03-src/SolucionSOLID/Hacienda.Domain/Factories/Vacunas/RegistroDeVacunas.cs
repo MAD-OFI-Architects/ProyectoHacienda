@@ -4,7 +4,7 @@ using Hacienda.Domain.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Hacienda.Domain.Factories;
+namespace Hacienda.Domain.Factories.Vacunas;
 
 public class RegistroDeVacunas : IRegistroDeVacunas
 {

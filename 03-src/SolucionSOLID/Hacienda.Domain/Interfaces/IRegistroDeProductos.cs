@@ -1,5 +1,7 @@
 using Hacienda.Domain.Entities;
-using Hacienda.Domain.Factories;
+using Hacienda.Domain.Factories.Reses;
+using Hacienda.Domain.Factories.Vacunas;
+using Hacienda.Domain.Factories.Productos;
 using Hacienda.Domain.Enums;
 
 namespace Hacienda.Domain.Interfaces;

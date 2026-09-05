@@ -5,7 +5,7 @@ using Hacienda.Domain.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Hacienda.Domain.Factories;
+namespace Hacienda.Domain.Factories.Productos;
 
 public class RegistroDeProductos : IRegistroDeProductos
 {

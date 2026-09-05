@@ -2,7 +2,7 @@ using Hacienda.Domain.Entities;
 using Hacienda.Domain.Enums;
 using Hacienda.Domain.Interfaces;
 
-namespace Hacienda.Domain.Factories;
+namespace Hacienda.Domain.Factories.Reses;
 
 /// <summary>
 /// Creator + Template Method (P-01, P-04, P-13): esqueleto sellado de creación de reses.

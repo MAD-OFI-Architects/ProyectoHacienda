@@ -5,7 +5,7 @@ using Hacienda.Domain.ValueObjects;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Hacienda.Domain.Factories;
+namespace Hacienda.Domain.Factories.Reses;
 
 /// <summary>
 /// Registro alimentado por DI con todos los creators (IEnumerable&lt;FabricaDeRes&gt;):

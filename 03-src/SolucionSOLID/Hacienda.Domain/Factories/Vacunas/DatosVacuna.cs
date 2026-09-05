@@ -1,7 +1,7 @@
 using Hacienda.Domain.Entities;
 using Hacienda.Domain.Enums;
 
-namespace Hacienda.Domain.Factories;
+namespace Hacienda.Domain.Factories.Vacunas;
 
 /// <summary>
 /// Request object (P-02): una sola forma de pedir una vacuna; la categoría decide la fábrica.

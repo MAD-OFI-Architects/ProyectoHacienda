@@ -1,4 +1,6 @@
-using Hacienda.Domain.Factories;
+using Hacienda.Domain.Factories.Reses;
+using Hacienda.Domain.Factories.Vacunas;
+using Hacienda.Domain.Factories.Productos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hacienda.Application.Interfaces;

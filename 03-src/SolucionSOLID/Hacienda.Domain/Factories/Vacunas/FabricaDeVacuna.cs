@@ -2,7 +2,7 @@ using Hacienda.Domain.Entities;
 using Hacienda.Domain.Enums;
 using Hacienda.Domain.Interfaces;
 
-namespace Hacienda.Domain.Factories;
+namespace Hacienda.Domain.Factories.Vacunas;
 
 /// <summary>
 /// Creator + Template Method (P-02, P-04, P-10, P-13): esqueleto sellado de vacunas y del LOTE común.

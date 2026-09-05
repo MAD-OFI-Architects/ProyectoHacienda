@@ -2,7 +2,7 @@ using Hacienda.Domain.Entities;
 using Hacienda.Domain.Enums;
 using Hacienda.Domain.Interfaces;
 
-namespace Hacienda.Domain.Factories;
+namespace Hacienda.Domain.Factories.Reses;
 
 /// <summary>
 /// Creator del subtipo lechero (SC-1, D-05 Variante A): 1 clase + 1 registro, cero ediciones (demostración OCP).

@@ -3,7 +3,7 @@ using Hacienda.Domain.Enums;
 using Hacienda.Domain.ValueObjects;
 using Hacienda.Domain.Interfaces;
 
-namespace Hacienda.Domain.Factories;
+namespace Hacienda.Domain.Factories.Productos;
 
 public class FabricaPiel : FabricaDeProducto
 {

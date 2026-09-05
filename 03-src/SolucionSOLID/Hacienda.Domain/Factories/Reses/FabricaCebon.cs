@@ -2,7 +2,7 @@ using Hacienda.Domain.Entities;
 using Hacienda.Domain.Enums;
 using Hacienda.Domain.Interfaces;
 
-namespace Hacienda.Domain.Factories;
+namespace Hacienda.Domain.Factories.Reses;
 
 public class FabricaCebon : FabricaDeRes
 {

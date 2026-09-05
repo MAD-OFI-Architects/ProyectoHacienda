@@ -3,7 +3,7 @@ using Hacienda.Domain.Enums;
 using Hacienda.Domain.ValueObjects;
 using Hacienda.Domain.Interfaces;
 
-namespace Hacienda.Domain.Factories;
+namespace Hacienda.Domain.Factories.Productos;
 
 /// <summary>
 /// Creator + Template Method (SC-1, P-13): mismo idioma que FabricaDeRes/FabricaDeVacuna.
