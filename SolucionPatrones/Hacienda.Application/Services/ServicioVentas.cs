@@ -81,15 +81,19 @@ public class ServicioVentas : IServicioVentas
         var productosActuales = _repoProducto.ObtenerTodos();
         var builder = _ventaBuilder.Iniciar().ConRes(res, potreroId, monto);
 
-        foreach (var (nombreProducto, cantidad) in productos)
-        {
-            var producto = productosActuales.FirstOrDefault(p =>
-                p.Nombre.Equals(nombreProducto, StringComparison.OrdinalIgnoreCase));
-            if (producto is null)
-                return ResultadoOperacion.Fallo($"El producto '{nombreProducto}' no existe en el inventario");
+foreach (var (nombreProducto, cantidad) in productos)
+            {
+                var producto = productosActuales.FirstOrDefault(p =>
+                    p.Nombre.Equals(nombreProducto, StringComparison.OrdinalIgnoreCase));
+                if (producto is null)
+                    return ResultadoOperacion.Fallo($"El producto '{nombreProducto}' no existe en el inventario");
 
-            builder.ConProducto(producto, cantidad);
-        }
+                if (cantidad > (int)producto.Stock)
+                    return ResultadoOperacion.Fallo(
+                        $"No hay stock suficiente de '{producto.Nombre}': solicitó {cantidad}, disponible {producto.Stock}");
+
+                builder.ConProducto(producto, cantidad);
+            }
 
         Venta venta = builder.Build();
 

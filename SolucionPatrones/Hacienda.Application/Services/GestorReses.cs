@@ -38,13 +38,27 @@ public class GestorReses : IGestorReses
             return ResultadoOperacion.Fallo($"Potrero '{potreroId}' no encontrado");
 
         TipoRes tipo = _registroReses.MapearDesdePotrero(potrero.Tipo);
-        Res res = _registroReses.Crear(tipo, nombre, peso, edad);
+
+        Res res;
+        try
+        {
+            // Reglas del dominio (edad del subtipo en el ctor, y capacidad/duplicados en Potrero)
+            // Lanzan excepciones: acá se traducen a fallo de negocio esperado, sin duplicar la regla.
+            res = _registroReses.Crear(tipo, nombre, peso, edad);
+            potrero.AgregarRes(res);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return ResultadoOperacion.Fallo(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            return ResultadoOperacion.Fallo(ex.Message);
+        }
 
         var errores = res.ValidarIntegridad();
         if (errores.Count > 0)
             return ResultadoOperacion.Fallo(errores);
-
-        potrero.AgregarRes(res);
 
         string mensajeEventos = EvaluarYPublicarPeso(res);
         if (potrero.EstaALaMitad)
@@ -69,10 +83,13 @@ public class GestorReses : IGestorReses
     public ResultadoOperacion AlimentarRes(string potreroId, string nombreRes, uint cantidad)
     {
         var potreros = _repoPotrero.ObtenerTodos();
-        var potrero = potreros.FirstOrDefault(p => p.Identificacion.Valor.Equals(potreroId, StringComparison.OrdinalIgnoreCase))
-            ?? throw new InvalidOperationException($"Potrero '{potreroId}' no encontrado");
-        var res = potrero.BuscarRes(nombreRes)
-            ?? throw new InvalidOperationException($"Res '{nombreRes}' no encontrada");
+        var potrero = potreros.FirstOrDefault(p => p.Identificacion.Valor.Equals(potreroId, StringComparison.OrdinalIgnoreCase));
+        if (potrero is null)
+            return ResultadoOperacion.Fallo($"Potrero '{potreroId}' no encontrado");
+
+        var res = potrero.BuscarRes(nombreRes);
+        if (res is null)
+            return ResultadoOperacion.Fallo($"Res '{nombreRes}' no encontrada");
 
         res.Alimentar(cantidad);
 

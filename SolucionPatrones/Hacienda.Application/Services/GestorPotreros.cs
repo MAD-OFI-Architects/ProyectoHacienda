@@ -32,10 +32,18 @@ public class GestorPotreros : IGestorPotreros
         if (_repoPotrero.ObtenerPorIdentificacion(identificacion) != null)
             return ResultadoOperacion.Fallo($"Ya existe un potrero '{identificacion}'");
 
-        var potrero = new Potrero(
-            _guidProvider.Nuevo(),
-            new Identificacion(identificacion),
-            tipo);
+        Potrero potrero;
+        try
+        {
+            potrero = new Potrero(
+                _guidProvider.Nuevo(),
+                new Identificacion(identificacion),
+                tipo);
+        }
+        catch (ArgumentException ex)
+        {
+            return ResultadoOperacion.Fallo(ex.Message);
+        }
 
         var potreros = _repoPotrero.ObtenerTodos();
         potreros.Add(potrero);
