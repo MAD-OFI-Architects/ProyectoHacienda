@@ -138,5 +138,10 @@ public abstract class Res : IVendible
     /// <summary>Registro mecánico para rehidratación desde persistencia (sin reglas).</summary>
     public void RegistrarVacunaEnHistorial(Vacuna vacuna) => _vacunasAplicadas.Add(vacuna);
 
-    public abstract string Serializar();
+    /// <summary>
+    /// Serialización pipe de la res. El sufijo es el subtipo (dato), no un literal por clase:
+    /// un solo lugar para el formato (P-09). Los subtipos no reescriben.
+    /// </summary>
+    public virtual string Serializar()
+        => $"{Id}|{Nombre}|{Peso}|{Edad}|{Tipo}";
 }

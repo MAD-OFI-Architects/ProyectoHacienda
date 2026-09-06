@@ -96,7 +96,7 @@
     @foreach (var venta in Model)
     {
     var precioKg = venta.Res.Peso > 0 ? (double)venta.Monto.Monto / venta.Res.Peso : 0;
-    var tieneItems = venta.Items != null && venta.Items.Any();
+    var tieneItems = venta.Items.Any();
     <tr>
     <td>
     @if (tieneItems)
@@ -148,7 +148,7 @@
     @foreach (var item in venta.Items)
     {
     <tr>
-    <td>@item.Vendible.Descripcion</td>
+    <td>@(item.Vendible?.Descripcion ?? "(sin descripción)")</td>
     <td class="text-center">@item.Cantidad</td>
     <td class="text-end">$@string.Format("{0:N0}", item.Monto)</td>
     </tr>

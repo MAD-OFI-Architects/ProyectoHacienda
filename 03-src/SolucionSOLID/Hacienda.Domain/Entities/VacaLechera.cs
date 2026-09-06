@@ -13,7 +13,4 @@ public class VacaLechera : Res
         : base(id, nombre, peso, edad) { }
 
     public override TipoRes Tipo => TipoRes.VacaLechera;
-
-    public override string Serializar()
-        => $"{Id}|{Nombre}|{Peso}|{Edad}|VacaLechera";
 }

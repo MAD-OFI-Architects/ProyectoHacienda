@@ -10,7 +10,4 @@ public class Cebon : Res
         : base(id, nombre, peso, edad) { }
 
     public override TipoRes Tipo => TipoRes.Cebon;
-
-    public override string Serializar()
-        => $"{Id}|{Nombre}|{Peso}|{Edad}|Cebon";
 }

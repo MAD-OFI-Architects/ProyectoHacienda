@@ -10,7 +10,4 @@ public class Novillo : Res
         : base(id, nombre, peso, edad) { }
 
     public override TipoRes Tipo => TipoRes.Novillo;
-
-    public override string Serializar()
-        => $"{Id}|{Nombre}|{Peso}|{Edad}|Novillo";
 }

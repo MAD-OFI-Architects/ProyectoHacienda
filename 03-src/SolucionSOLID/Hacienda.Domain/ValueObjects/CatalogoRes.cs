@@ -46,25 +46,4 @@ public static class CatalogoRes
 
         throw new InvalidOperationException($"Tipo de res desconocido: {valor}");
     }
-
-    public static TipoRes MapearDesdePotrero(TipoPotrero tipoPotrero) => tipoPotrero switch
-    {
-        TipoPotrero.Ternero => TipoRes.Ternero,
-        TipoPotrero.Cebon => TipoRes.Cebon,
-        TipoPotrero.Novillo => TipoRes.Novillo,
-        _ => throw new ArgumentException($"Tipo de potrero no reconocido: {tipoPotrero}")
-    };
-
-    public static Res CrearDesdeNombre(Guid id, string nombre, uint peso, ushort edad, string tipo)
-    {
-        var tipoRes = Parsear(tipo);
-
-        return tipoRes switch
-        {
-            TipoRes.Ternero => new Ternero(id, nombre, peso, edad),
-            TipoRes.Cebon => new Cebon(id, nombre, peso, edad),
-            TipoRes.Novillo => new Novillo(id, nombre, peso, edad),
-            _ => throw new InvalidOperationException($"Tipo de res no soportado: {tipo}")
-        };
-    }
 }
