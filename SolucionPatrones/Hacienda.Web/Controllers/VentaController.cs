@@ -44,7 +44,7 @@ public class VentaController : Controller
 
     [HttpPost]
     public IActionResult VenderConDerivados(string potreroId, string nombreRes, decimal monto,
-        IReadOnlyDictionary<string, int>? productos)
+        Dictionary<string, int>? productos)
     {
         var seleccion = (productos ?? new Dictionary<string, int>())
             .Where(kv => kv.Value > 0)

@@ -11,20 +11,17 @@ namespace Hacienda.Application.Services;
 public class GestorReses : IGestorReses
 {
     private readonly IRepositorioPotrero _repoPotrero;
-    private readonly IRepositorioVacuna _repoVacuna;
     private readonly IRegistroDeReses _registroReses;
     private readonly IDomainEventPublisher _eventPublisher;
     private readonly TimeProvider _reloj;
 
     public GestorReses(
         IRepositorioPotrero repoPotrero,
-        IRepositorioVacuna repoVacuna,
         IRegistroDeReses registroReses,
         IDomainEventPublisher eventPublisher,
         TimeProvider reloj)
     {
         _repoPotrero = repoPotrero;
-        _repoVacuna = repoVacuna;
         _registroReses = registroReses;
         _eventPublisher = eventPublisher;
         _reloj = reloj;
@@ -123,7 +120,6 @@ public class GestorReses : IGestorReses
     public List<(Potrero Potrero, Res Res)> ListarReses()
     {
         var potreros = _repoPotrero.ObtenerTodos();
-        _repoVacuna.CargarVacunasAplicadasEnPotreros(potreros);
 
         var resultado = new List<(Potrero, Res)>();
         foreach (var potrero in potreros)
@@ -135,7 +131,6 @@ public class GestorReses : IGestorReses
 
     public Dictionary<string, object> ObtenerEstadisticas()
     {
-        _repoVacuna.CargarVacunasAplicadasEnPotreros(_repoPotrero.ObtenerTodos());
         var todas = ListarReses();
         var stats = new Dictionary<string, object>
         {

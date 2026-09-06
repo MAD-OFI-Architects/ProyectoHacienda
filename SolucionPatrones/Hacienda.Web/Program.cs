@@ -58,7 +58,7 @@ var connectionString = $"Data Source={Path.Combine(directorioDatos, "hacienda.db
 DatabaseInitializer.Initialize(connectionString);
 
 builder.Services.AddScoped<IRepositorioPotrero>(sp =>
-    new RepositorioPotreroSqlite(connectionString, sp.GetRequiredService<IGuidProvider>(), sp.GetRequiredService<IRegistroDeReses>()));
+    new RepositorioPotreroSqlite(connectionString, sp.GetRequiredService<IGuidProvider>(), sp.GetRequiredService<IRegistroDeReses>(), sp.GetRequiredService<IRepositorioVacuna>()));
 builder.Services.AddScoped<IRepositorioRes>(sp =>
     new RepositorioResSqlite(connectionString, sp.GetRequiredService<IGuidProvider>(), sp.GetRequiredService<IRegistroDeReses>()));
 builder.Services.AddScoped<IRepositorioVacuna>(sp =>

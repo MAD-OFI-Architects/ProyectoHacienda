@@ -136,7 +136,14 @@ public abstract class Res : IVendible
     }
 
     /// <summary>Registro mecánico para rehidratación desde persistencia (sin reglas).</summary>
-    public void RegistrarVacunaEnHistorial(Vacuna vacuna) => _vacunasAplicadas.Add(vacuna);
+    public void RegistrarVacunaEnHistorial(Vacuna vacuna)
+    {
+        // Idempotente: la rehidratación puede cargar el mismo historial más de una vez
+        // y no debe duplicar una vacuna ya registrada en memoria.
+        if (_vacunasAplicadas.Any(v => v.Id == vacuna.Id))
+            return;
+        _vacunasAplicadas.Add(vacuna);
+    }
 
     /// <summary>
     /// Serialización pipe de la res. El sufijo es el subtipo (dato), no un literal por clase:

@@ -14,7 +14,6 @@ public class InstaladorChip : IInstaladorChip
     private readonly IRepositorioPotrero _repoPotrero;
     private readonly IRepositorioVacuna _repoVacuna;
     private readonly IGuidProvider _guidProvider;
-    private readonly IResLocator _resLocator;
     private readonly TimeProvider _reloj;
 
     public InstaladorChip(
@@ -22,20 +21,23 @@ public class InstaladorChip : IInstaladorChip
         IRepositorioPotrero repoPotrero,
         IRepositorioVacuna repoVacuna,
         IGuidProvider guidProvider,
-        IResLocator resLocator,
         TimeProvider reloj)
     {
         _repoChip = repoChip;
         _repoPotrero = repoPotrero;
         _repoVacuna = repoVacuna;
         _guidProvider = guidProvider;
-        _resLocator = resLocator;
         _reloj = reloj;
     }
 
     public ResultadoOperacion Instalar(Guid resId, string numeroSerieStr)
     {
-        var (potrero, res) = _resLocator.BuscarPorId(resId);
+        // Grafo ÚNICO: se lee una sola vez, se modifica en memoria y se persiste esa misma instancia.
+        // (Releer con ObtenerTodos() después de mutar descarta el cambio: el chip_id nunca se guardaba.)
+        var potreros = _repoPotrero.ObtenerTodos();
+        var potrero = potreros.FirstOrDefault(p => p.Reses.Any(r => r.Id == resId));
+        var res = potrero?.Reses.FirstOrDefault(r => r.Id == resId);
+
         if (res == null)
             return ResultadoOperacion.Fallo($"Res con ID {resId} no encontrada");
 
@@ -57,8 +59,8 @@ public class InstaladorChip : IInstaladorChip
 
         res.InstalarChip(chip);
         _repoChip.Guardar(chip);
-        _repoPotrero.GuardarTodos(_repoPotrero.ObtenerTodos());
-        _repoVacuna.GuardarAplicadas(_repoPotrero.ObtenerTodos());
+        _repoPotrero.GuardarTodos(potreros);
+        _repoVacuna.GuardarAplicadas(potreros);
 
         return ResultadoOperacion.Ok($"Chip {numeroSerieStr} instalado correctamente en la res {res.Nombre}");
     }

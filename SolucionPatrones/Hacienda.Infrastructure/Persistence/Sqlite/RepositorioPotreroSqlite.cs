@@ -12,12 +12,14 @@ public class RepositorioPotreroSqlite : IRepositorioPotrero
     private readonly string _connectionString;
     private readonly IGuidProvider _guidProvider;
     private readonly IRegistroDeReses _registroReses;
+    private readonly IRepositorioVacuna _repoVacuna;
 
-    public RepositorioPotreroSqlite(string connectionString, IGuidProvider guidProvider, IRegistroDeReses registroReses)
+    public RepositorioPotreroSqlite(string connectionString, IGuidProvider guidProvider, IRegistroDeReses registroReses, IRepositorioVacuna repoVacuna)
     {
         _connectionString = connectionString;
         _guidProvider = guidProvider;
         _registroReses = registroReses;
+        _repoVacuna = repoVacuna;
     }
 
     public List<Potrero> ObtenerTodos()
@@ -49,6 +51,9 @@ public class RepositorioPotreroSqlite : IRepositorioPotrero
             potreros.Add(potrero);
         }
 
+        // Agregado hidratado completo: historial de vacunas aplicadas (no es un "extra" de estadística).
+        _repoVacuna.CargarVacunasAplicadasEnPotreros(potreros);
+
         return potreros;
     }
 
@@ -78,6 +83,9 @@ public class RepositorioPotreroSqlite : IRepositorioPotrero
             CargarChipSiExiste(res, resRow, conn);
             potrero.AgregarRes(res);
         }
+
+        // Agregado hidratado completo.
+        _repoVacuna.CargarVacunasAplicadasEnPotreros(new List<Potrero> { potrero });
 
         return potrero;
     }

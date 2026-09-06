@@ -95,13 +95,9 @@ public class ServicioVacunacion : IServicioVacunacion
         var vacuna = vacunas.FirstOrDefault(v => v.Lote.Equals(loteVacuna, StringComparison.OrdinalIgnoreCase))
             ?? throw new InvalidOperationException($"Vacuna con lote '{loteVacuna}' no encontrada");
 
-        var potreros = _repoPotrero.ObtenerTodos();
+var potreros = _repoPotrero.ObtenerTodos();
         var potrero = potreros.FirstOrDefault(p => p.Identificacion.Valor.Equals(potreroId, StringComparison.OrdinalIgnoreCase))
             ?? throw new InvalidOperationException($"Potrero '{potreroId}' no encontrado");
-
-        // La rehidratación de potreros NO trae el histórico de vacunas aplicadas:
-        // hay que cargarlo antes de operar, o los contadores parten de cero (esquema nunca completo).
-        _repoVacuna.CargarVacunasAplicadasEnPotreros(potreros);
 
         var res = potrero.BuscarRes(nombreRes)
             ?? throw new InvalidOperationException($"Res '{nombreRes}' no encontrada");

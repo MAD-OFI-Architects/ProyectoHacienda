@@ -60,8 +60,10 @@ public class RepositorioVentaSqlite : IRepositorioVenta
         conn.Open();
         using var tx = conn.BeginTransaction();
 
-        conn.Execute("DELETE FROM ventas", transaction: tx);
+        // Orden hijos → padres: venta_items referencia ventas(id) por FK;
+        // borrar las ventas primero dispara el constraint dentro de la transacción.
         conn.Execute("DELETE FROM venta_items", transaction: tx);
+        conn.Execute("DELETE FROM ventas", transaction: tx);
 
         foreach (var venta in ventas)
         {
