@@ -34,7 +34,18 @@ public abstract class Vacuna
     }
 
     public abstract VacunaCategoria Categoria { get; }
-    public abstract string Serializar();
+
+    /// <summary>
+    /// Serialización pipe de la vacuna (P-09): formato ÚNICO en la base.
+    /// El template method sella el marco común (Nombre|Lote|fechas|Categoría) y solo
+    /// el sufijo —que difiere en tipo de dato por subtipo— lo aporta el hook.
+    /// </summary>
+    public string Serializar()
+        => $"{Nombre}|{Lote}|{FechaVencimiento:yyyy-MM-dd}|{FechaAplicacion:yyyy-MM-dd}|{Categoria}|{SerializarSufijo()}";
+
+    /// <summary>Hook (Factory Method): el dato propio del subtipo al final de la serialización.</summary>
+    protected abstract string SerializarSufijo();
+
     public abstract string DetalleVisual();
 
     public EstadoVacuna CalcularEstado(TimeProvider reloj)

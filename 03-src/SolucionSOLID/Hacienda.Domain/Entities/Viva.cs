@@ -22,8 +22,7 @@ public class Viva : Vacuna
 
     public override VacunaCategoria Categoria => VacunaCategoria.Viva;
 
-    public override string Serializar()
-        => $"{Nombre}|{Lote}|{FechaVencimiento:yyyy-MM-dd}|{FechaAplicacion:yyyy-MM-dd}|Viva|{(byte)Atenuacion}";
+    protected override string SerializarSufijo() => ((byte)Atenuacion).ToString();
 
     public override string DetalleVisual() => $"Atenuada";
 }

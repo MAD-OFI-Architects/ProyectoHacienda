@@ -19,8 +19,7 @@ public class Bacteriana : Vacuna
 
     public override VacunaCategoria Categoria => VacunaCategoria.Bacteriana;
 
-    public override string Serializar()
-        => $"{Nombre}|{Lote}|{FechaVencimiento:yyyy-MM-dd}|{FechaAplicacion:yyyy-MM-dd}|Bacteriana|{PeriodoAplicacion}";
+    protected override string SerializarSufijo() => PeriodoAplicacion.ToString();
 
     public override string DetalleVisual() => $"{PeriodoAplicacion} sem.";
 }
