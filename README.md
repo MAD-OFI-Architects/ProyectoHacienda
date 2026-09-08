@@ -1,15 +1,15 @@
-# Proyecto Hacienda - Solución SOLID
+# Proyecto Hacienda - Reto 2: Patrones de Diseño Arquitectónico
 
-Sistema de gestión para una hacienda ganadera, aplicando los principios SOLID con arquitectura limpia (Clean Architecture).
+Sistema de gestión para una hacienda ganadera. Segunda evolución: del diseño correcto (SOLID) al diseño robusto, aplicando patrones de diseño (Factory Method + Template Method, Builder y Observer) sin cambiar el estilo arquitectónico ni el comportamiento observable.
 
 ## Roles del Equipo
 
 | Integrante | Rol | Responsabilidad |
 |------------|-----|-----------------|
-| Mateo Rojas Hernández | Arquitecto de dominio | Identificación de responsabilidades y límites de cada clase (SRP), modelo del dominio, jerarquías de herencia y su validez frente a LSP |
-| María Alejandra Vargas Duque | Arquitecto de dependencias | Mapa de dependencias, abstracciones (interfaces), inversión e inyección de dependencias, composition root (DIP, ISP) |
-| David Salcedo Higuita | Ingeniero de comportamiento | Pruebas de caracterización, evidencia de que la conducta observable se preservó, escenarios de ejecución del programa principal |
-| Los tres | Integrador y evidencia | Consistencia diagrama–código, estructura del entregable, bitácora de uso de IA, métricas antes/después |
+| Mateo Rojas Hernández | Arquitecto Líder | Detección de los puntos rígidos del diseño, evaluación y descarte de patrones, y diseño del TO-BE (qué sale, qué entra, cómo se relacionan) |
+| María Alejandra Vargas Duque | Arquitecta de Verificación | Demostrar que SOLID sigue en pie tras introducir los patrones y que el comportamiento observable no cambió (matriz de verificación + casos antes/después) |
+| David Salcedo Higuita | Arquitecto de Comunicación | Las dos vistas (negocio y equipo de desarrollo), la bitácora de decisiones frente a la IA y el armado del documento de sustentación |
+| Mateo + Alejandra | Riesgos y despliegue | Análisis de riesgos de incorporar los patrones y plan de cambio por fases |
 
 ## Instrucciones de Ejecución
 
@@ -27,7 +27,7 @@ cd ProyectoHacienda
 
 2. Navegar a la carpeta del proyecto:
 ```bash
-cd 03-src/SolucionSOLID
+cd SolucionPatrones
 ```
 
 3. Compilar el proyecto:
@@ -52,14 +52,14 @@ https://localhost:5001
 - **Visitante:** visitante / visit789
 
 ## Video de Presentación
-https://www.youtube.com/watch?v=6mL6s_rgIz4
+https://www.youtube.com/watch?v=W0Ew_MW05Ug
 
 ## Estructura del Proyecto
 
 ```
-SolucionSOLID/
-├── Hacienda.Domain/          # Entidades, enums, interfaces, value objects
-├── Hacienda.Application/     # Servicios, validaciones, interfaces de aplicación
-├── Hacienda.Infrastructure/  # Persistencia SQLite, eventos, políticas
-└── Hacienda.Web/             # Controllers, Views (Razor), Program.cs
+SolucionPatrones/
+├── Hacienda.Domain/          # Entidades, reglas, value objects, factories (patrones), builders, eventos
+├── Hacienda.Application/     # Servicios (casos de uso), fachadas delgadas
+├── Hacienda.Infrastructure/  # Persistencia SQLite, despachador de eventos, handlers, políticas
+└── Hacienda.Web/             # Controllers, Views (Razor), Program.cs (composition root)
 ```

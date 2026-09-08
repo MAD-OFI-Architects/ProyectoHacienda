@@ -22,3 +22,9 @@ Thumbs.db
 
 # Third-party libraries (should be restored via npm/libman)
 wwwroot/lib/
+
+# Backups de diagramas
+*.bak
+*.bak2
+*.dia~
+*.autosave~

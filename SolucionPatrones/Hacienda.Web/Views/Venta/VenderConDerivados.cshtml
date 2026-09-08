@@ -1,0 +1,177 @@
+@using Hacienda.Domain.Entities
+@using System.Text.Json
+@model List<ProductoDerivado>
+@{
+    ViewData["Title"] = "🛒 Vender con Derivados";
+    var potreros = (List<Potrero>)ViewBag.Potreros;
+    var resesPorPotrero = potreros.ToDictionary(
+        p => p.Identificacion.Valor,
+        p => p.Reses.Select(r => r.Nombre).ToList());
+}
+
+<div class="container mt-4">
+    <!-- Encabezado -->
+    <div class="aw-page-header mb-4 text-center">
+        <h1 class="display-6 fw-bold mb-1" style="color: var(--aw-text);">
+            🛒 Vender con Derivados
+        </h1>
+        <p class="text-muted mb-0">Venda una res y agregue productos derivados (lácteos, carne, piel) en una sola operación</p>
+    </div>
+
+    <!-- Mensaje de éxito/error -->
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-@TempData["TipoMensaje"] alert-dismissible fade show" role="alert">
+            <strong>@TempData["Mensaje"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <form asp-action="VenderConDerivados" method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- Ganado -->
+                <div class="aw-card mb-4">
+                    <div class="aw-card-header">
+                        <span class="material-icons-outlined" style="vertical-align: sub;">agriculture</span>
+                        Ganado
+                    </div>
+                    <div class="p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="potreroId" class="form-label fw-bold">Potrero:</label>
+                                <select class="form-select" id="potreroId" name="potreroId" required>
+                                    <option value="" selected disabled>Seleccione un potrero…</option>
+                                    @foreach (var potrero in potreros)
+                                    {
+                                        <option value="@potrero.Identificacion.Valor">@potrero.Identificacion.Valor (@potrero.CantidadReses reses)</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nombreRes" class="form-label fw-bold">Res a vender:</label>
+                                <select class="form-select" id="nombreRes" name="nombreRes" required disabled>
+                                    <option value="" selected disabled>Primero seleccione un potrero…</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="monto" class="form-label fw-bold">Monto de venta (COP):</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background: var(--aw-green-light); border: 1px solid var(--aw-border);">$</span>
+                                    <input type="number" class="form-control" id="monto" name="monto" min="1" required placeholder="2500000" />
+                                </div>
+                                <small class="form-text text-muted">Monto de la res. Los derivados se cobran aparte según su precio.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Productos derivados -->
+                <div class="aw-card mb-4">
+                    <div class="aw-card-header">
+                        <span class="material-icons-outlined" style="vertical-align: sub;">shopping_basket</span>
+                        Productos derivados (opcionales)
+                    </div>
+                    <div class="p-4">
+                        @if (!Model.Any())
+                        {
+                            <p class="text-muted mb-0 text-center">No hay productos derivados disponibles. Puede continuar solo con la venta de la res.</p>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Producto</th>
+                                            <th scope="col" class="text-end">Precio</th>
+                                            <th scope="col" class="text-center">Stock</th>
+                                            <th scope="col" class="text-center" style="width: 160px;">Cantidad</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var producto in Model)
+                                        {
+                                            <tr>
+                                                <td class="fw-bold">
+                                                    @producto.Nombre
+                                                    <small class="text-muted d-block">@producto.Unidad</small>
+                                                </td>
+                                                <td class="text-end">$@string.Format("{0:N0}", producto.Precio.Monto)</td>
+                                                <td class="text-center">@producto.Stock</td>
+                                                <td class="text-center">
+                                                    <input type="number"
+                                                           class="form-control form-control-sm text-center"
+                                                           name="productos[@producto.Nombre]"
+                                                           value="0" min="0" max="@producto.Stock" />
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <small class="form-text text-muted">Deje en 0 los productos que no desea incluir en la venta.</small>
+                        }
+                    </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="d-flex justify-content-center gap-3 mb-4">
+                    <a asp-action="Productos" class="btn aw-btn aw-btn-secondary">
+                        <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: sub;">close</span>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn aw-btn aw-btn-primary">
+                        <span class="material-icons-outlined" style="font-size: 1rem; vertical-align: sub;">check</span>
+                        Confirmar Venta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-cerrar alertas después de 15 segundos
+        setTimeout(function () {
+            $('.alert-dismissible').alert('close');
+        }, 15000);
+
+        // Reses por potrero (poblado desde el servidor)
+        var resesPorPotrero = @Html.Raw(JsonSerializer.Serialize(resesPorPotrero));
+
+        var selectPotrero = document.getElementById('potreroId');
+        var selectRes = document.getElementById('nombreRes');
+
+        selectPotrero.addEventListener('change', function () {
+            var potrero = this.value;
+            selectRes.innerHTML = '';
+            selectRes.disabled = true;
+
+            var reses = resesPorPotrero[potrero] || [];
+            if (reses.length === 0) {
+                selectRes.innerHTML = '<option value="" selected disabled>Sin reses en este potrero</option>';
+                return;
+            }
+
+            var opcionInicial = document.createElement('option');
+            opcionInicial.value = '';
+            opcionInicial.selected = true;
+            opcionInicial.disabled = true;
+            opcionInicial.textContent = 'Seleccione una res…';
+            selectRes.appendChild(opcionInicial);
+
+            reses.forEach(function (nombre) {
+                var opcion = document.createElement('option');
+                opcion.value = nombre;
+                opcion.textContent = nombre;
+                selectRes.appendChild(opcion);
+            });
+
+            selectRes.disabled = false;
+        });
+    </script>
+}
